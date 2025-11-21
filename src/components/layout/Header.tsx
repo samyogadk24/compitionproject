@@ -25,6 +25,7 @@ const authenticatedNavLinks = [
     { href: "/dashboard/announcements", label: "Announcements" },
     { href: "/dashboard/events", label: "Events" },
     { href: "/dashboard/students", label: "Directory" },
+    { href: "/contact", label: "Contact" },
 ];
 
 
@@ -59,7 +60,7 @@ export default function Header() {
         <>
           {user.role === 'teacher' && (
              <Button asChild variant="ghost" size="sm" className="hidden md:flex">
-                <Link href="/teacher/dashboard">
+                <Link href="/teacher/login">
                   <Shield />
                   Teacher Zone
                 </Link>
@@ -105,7 +106,7 @@ export default function Header() {
         <div className="flex flex-col gap-2 mt-auto">
           {user.role === 'teacher' && (
             <Button asChild variant="outline" size="sm" onClick={closeMenu}>
-              <Link href="/teacher/dashboard">
+              <Link href="/teacher/login">
                 <Shield />
                 Teacher Zone
               </Link>
