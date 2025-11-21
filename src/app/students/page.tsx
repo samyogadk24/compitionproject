@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemoFirebase } from '@/firebase';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { useFirestore } from '@/firebase';
 import { collection, query, Query } from 'firebase/firestore';
@@ -62,7 +62,7 @@ function PageSkeleton() {
 
 export default function StudentsPage() {
   const firestore = useFirestore();
-  const studentsQuery = useMemo(() => {
+  const studentsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     // The explicit type cast is required here.
     return query(collection(firestore, 'students')) as Query<Student>;
