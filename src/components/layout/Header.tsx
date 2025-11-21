@@ -19,7 +19,11 @@ const baseNavLinks = [
 ];
 
 const authenticatedNavLinks = [
-    { href: "/students", label: "Directory" },
+    { href: "/dashboard", label: "Dashboard" },
+    { href: "/dashboard/announcements", label: "Announcements" },
+    { href: "/dashboard/events", label: "Events" },
+    { href: "/dashboard/students", label: "Directory" },
+    { href: "/dashboard/contact", label: "Contact" },
 ];
 
 
@@ -27,7 +31,7 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const auth = useAuth();
-  const { user, isUserLoading: isUserLoading } = useUser();
+  const { user, isUserLoading: userLoading } = useUser();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
 
@@ -35,7 +39,7 @@ export default function Header() {
     setHasMounted(true);
   }, []);
   
-  const navLinks = hasMounted && user ? [...baseNavLinks, ...authenticatedNavLinks] : baseNavLinks;
+  const navLinks = hasMounted && user ? authenticatedNavLinks : baseNavLinks;
 
 
   const handleLogout = async () => {
@@ -45,7 +49,7 @@ export default function Header() {
   };
 
   const AuthButtons = () => {
-    if (!hasMounted || isUserLoading) {
+    if (!hasMounted || userLoading) {
       return <div className="h-9 w-24 rounded-md bg-muted animate-pulse hidden md:block" />;
     }
 
@@ -87,7 +91,7 @@ export default function Header() {
   const MobileAuthButtons = () => {
     const closeMenu = () => setIsMobileMenuOpen(false);
 
-    if (!hasMounted || isUserLoading) {
+    if (!hasMounted || userLoading) {
       return (
         <div className="flex flex-col gap-2 mt-auto">
            <div className="h-10 w-full rounded-md bg-muted animate-pulse" />

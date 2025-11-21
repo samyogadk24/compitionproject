@@ -10,7 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CalendarDays, Library, Megaphone, PartyPopper } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { getAnnouncements, getEvents } from "@/lib/data";
+import { generateAnnouncements } from "@/ai/flows/generate-announcements-flow";
+import { generateEvents } from "@/ai/flows/generate-events-flow";
 
 const featureCards = [
   {
@@ -22,7 +23,7 @@ const featureCards = [
   {
     title: "School Directory",
     description: "Connect with others.",
-    href: "/students",
+    href: "/dashboard/students",
     icon: <Megaphone className="w-8 h-8 text-primary" />,
   },
   {
@@ -37,8 +38,9 @@ export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const heroImage = PlaceHolderImages.find((img) => img.id === "hero-school");
-  const latestAnnouncements = await getAnnouncements(3);
-  const upcomingEvents = await getEvents(3);
+  const latestAnnouncements = await generateAnnouncements();
+  const upcomingEvents = await generateEvents();
+
 
   return (
     <div className="flex flex-col flex-1">
@@ -76,8 +78,8 @@ export default async function Home() {
             <h2 className="text-3xl font-bold font-headline">Latest Announcements</h2>
           </div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {latestAnnouncements.map((announcement) => (
-              <Card key={announcement.id} className="transition-shadow hover:shadow-md">
+            {latestAnnouncements.slice(0, 3).map((announcement, index) => (
+              <Card key={index} className="transition-shadow hover:shadow-md">
                 <CardHeader>
                   <CardTitle className="font-headline text-xl">{announcement.title}</CardTitle>
                   <CardDescription className="flex items-center gap-2 text-sm pt-1">
@@ -93,7 +95,7 @@ export default async function Home() {
           </div>
            <div className="text-center mt-8">
               <Button asChild variant="outline">
-                  <Link href="/dashboard/announcements">View All Announcements <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                  <Link href="/announcements">View All Announcements <ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
           </div>
         </section>
@@ -105,8 +107,8 @@ export default async function Home() {
             <h2 className="text-3xl font-bold font-headline">Upcoming Events</h2>
           </div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {upcomingEvents.map((event) => (
-              <Card key={event.id} className="flex flex-col transition-shadow hover:shadow-md">
+            {upcomingEvents.slice(0, 3).map((event, index) => (
+              <Card key={index} className="flex flex-col transition-shadow hover:shadow-md">
                 <CardHeader>
                   <CardTitle className="font-headline text-xl">{event.title}</CardTitle>
                   <CardDescription className="flex items-center gap-2 text-sm pt-1">
@@ -122,7 +124,7 @@ export default async function Home() {
           </div>
            <div className="text-center mt-8">
               <Button asChild variant="outline">
-                  <Link href="/dashboard/events">View All Events <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                  <Link href="/events">View All Events <ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
           </div>
         </section>
