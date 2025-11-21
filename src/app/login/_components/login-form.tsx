@@ -1,75 +1,99 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
-import { useFormStatus } from "react-dom";
-import { login } from "@/lib/actions";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  User as FirebaseUser,
+} from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { useRouter } from "next/navigation";
+import { useAuth, useFirestore } from "@/firebase";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
-
-function LoginButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" className="w-full" disabled={pending}>
-      {pending ? "Logging in..." : "Login"}
-    </Button>
-  );
-}
+import { AlertCircle, Chrome } from "lucide-react";
+import { useState } from "react";
 
 export default function LoginForm() {
-  const initialState = { message: null, errors: {} };
-  const [state, dispatch] = useActionState(login, initialState);
+  const auth = useAuth();
+  const firestore = useFirestore();
+  const router = useRouter();
   const { toast } = useToast();
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-   useEffect(() => {
-    if (state?.message && state.errors) {
-       toast({
+  const handleGoogleSignIn = async () => {
+    if (!auth || !firestore) {
+      setError("Firebase is not initialized. Please try again later.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Check if user exists in Firestore, if not create a new document
+      const userRef = doc(firestore, "students", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          createdAt: new Date().toISOString(),
+        });
+      }
+
+      toast({
+        title: "Login Successful",
+        description: `Welcome back, ${user.displayName}!`,
+      });
+      router.push("/dashboard");
+    } catch (err: any) {
+      console.error("Google sign-in error:", err);
+      let message = "An unexpected error occurred during sign-in.";
+      if (err.code === "auth/popup-closed-by-user") {
+        message = "Sign-in cancelled. Please try again.";
+      } else if (err.code === "auth/network-request-failed") {
+        message = "Network error. Please check your internet connection.";
+      }
+      setError(message);
+      toast({
         title: "Login Failed",
-        description: state.message,
+        description: message,
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
-  }, [state, toast]);
+  };
 
   return (
-    <form action={dispatch} className="space-y-4">
-      {state?.message && state.errors && (
-         <Alert variant="destructive">
+    <div className="space-y-4">
+      {error && (
+        <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{state.message}</AlertDescription>
+          <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          placeholder="student@school.edu"
-          required
-        />
-        {state.errors?.email && (
-           <p className="text-sm font-medium text-destructive">{state.errors.email[0]}</p>
+      <Button
+        className="w-full"
+        onClick={handleGoogleSignIn}
+        disabled={loading}
+      >
+        {loading ? (
+          "Signing in..."
+        ) : (
+          <>
+            <Chrome className="mr-2 h-4 w-4" /> Sign in with Google
+          </>
         )}
-      </div>
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="password">Password</Label>
-          <Link href="#" className="text-sm text-primary hover:underline">
-            Forgot password?
-          </Link>
-        </div>
-        <Input id="password" name="password" type="password" required />
-         {state.errors?.password && (
-           <p className="text-sm font-medium text-destructive">{state.errors.password[0]}</p>
-        )}
-      </div>
-      <LoginButton />
-    </form>
+      </Button>
+    </div>
   );
 }

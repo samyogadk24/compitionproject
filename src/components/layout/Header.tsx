@@ -6,8 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SchoolPulseLogo } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { Menu, LogIn } from "lucide-react";
+import { Menu, LogIn, LogOut, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
+import { useUser } from "@/firebase";
+import { getAuth, signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -18,7 +21,90 @@ const navLinks = [
 
 export default function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, loading } = useUser();
+  const auth = getAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      router.push('/');
+    } catch (error) {
+      console.error("Error signing out: ", error);
+    }
+  };
+
+  const UserActions = () => {
+    if (loading) {
+      return (
+        <Button variant="ghost" size="sm" className="hidden md:flex" disabled>
+          Loading...
+        </Button>
+      );
+    }
+    if (user) {
+      return (
+        <>
+          <Button asChild size="sm" variant="ghost" className="hidden md:flex">
+            <Link href="/dashboard">
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              Dashboard
+            </Link>
+          </Button>
+          <Button onClick={handleSignOut} size="sm" className="hidden md:flex">
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
+        </>
+      );
+    }
+    return (
+      <Button asChild size="sm" className="hidden md:flex">
+        <Link href="/login">
+          <LogIn className="mr-2 h-4 w-4" />
+          Student Login
+        </Link>
+      </Button>
+    );
+  };
+  
+  const MobileUserActions = () => {
+    if (loading) {
+       return (
+        <Button variant="ghost" size="sm" disabled>
+          Loading...
+        </Button>
+      );
+    }
+    if (user) {
+      return (
+        <>
+           <Button asChild size="sm" onClick={() => setIsMobileMenuOpen(false)}>
+            <Link href="/dashboard">
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              Dashboard
+            </Link>
+          </Button>
+          <Button onClick={() => {
+            handleSignOut();
+            setIsMobileMenuOpen(false);
+          }} size="sm">
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
+        </>
+      );
+    }
+    return (
+      <Button asChild size="sm" onClick={() => setIsMobileMenuOpen(false)}>
+        <Link href="/login">
+          <LogIn className="mr-2 h-4 w-4" />
+          Student Login
+        </Link>
+      </Button>
+    );
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-card shadow-sm">
@@ -42,12 +128,7 @@ export default function Header() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-           <Button asChild size="sm" className="hidden md:flex">
-            <Link href="/login">
-              <LogIn className="mr-2 h-4 w-4" />
-              Student Login
-            </Link>
-          </Button>
+          <UserActions />
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="md:hidden">
@@ -76,12 +157,7 @@ export default function Header() {
                     </Link>
                   ))}
                 </nav>
-                 <Button asChild size="sm" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Link href="/login">
-                    <LogIn className="mr-2 h-4 w-4" />
-                    Student Login
-                    </Link>
-                </Button>
+                 <MobileUserActions />
               </div>
             </SheetContent>
           </Sheet>

@@ -18,3 +18,11 @@ export type Resource = {
   description: string;
   fileUrl: string;
 };
+
+export type Student = {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+  createdAt: string;
+};

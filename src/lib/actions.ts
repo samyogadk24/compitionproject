@@ -2,14 +2,8 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 // Schemas
-const LoginSchema = z.object({
-  email: z.string().email("Please enter a valid email address."),
-  password: z.string().min(6, "Password must be at least 6 characters."),
-});
-
 const AnnouncementSchema = z.object({
   title: z.string().min(1, "Title is required."),
   description: z.string().min(1, "Description is required."),
@@ -28,24 +22,6 @@ export type State = {
   message?: string | null;
 };
 
-// Actions
-export async function login(prevState: State, formData: FormData): Promise<State> {
-  const validatedFields = LoginSchema.safeParse(
-    Object.fromEntries(formData.entries())
-  );
-
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: "Invalid fields. Failed to login.",
-    };
-  }
-
-  // In a real app, you'd authenticate with Firebase Auth
-  console.log("Logging in with:", validatedFields.data);
-  // Simulate successful login
-  redirect("/dashboard");
-}
 
 export async function addAnnouncement(prevState: State, formData: FormData): Promise<State> {
   const validatedFields = AnnouncementSchema.safeParse(
