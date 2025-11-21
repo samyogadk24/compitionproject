@@ -95,7 +95,7 @@ export default async function Home() {
           </div>
            <div className="text-center mt-8">
               <Button asChild variant="outline">
-                  <Link href="/announcements">View All Announcements <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                  <Link href="/dashboard/announcements">View All Announcements <ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
           </div>
         </section>
@@ -124,7 +124,7 @@ export default async function Home() {
           </div>
            <div className="text-center mt-8">
               <Button asChild variant="outline">
-                  <Link href="/events">View All Events <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                  <Link href="/dashboard/events">View All Events <ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
           </div>
         </section>

@@ -1,6 +1,4 @@
 import type { Announcement, Event, Resource } from "./definitions";
-import { initializeFirebaseAdmin } from "@/firebase/server";
-import type { OrderByDirection } from "firebase-admin/firestore";
 
 export const getAnnouncements = async (count?: number): Promise<Announcement[]> => {
   // This function is being cleared to prevent server-side execution errors.
@@ -15,8 +13,6 @@ export const getEvents = async (count?: number): Promise<Event[]> => {
 };
 
 export const getResources = async (): Promise<Resource[]> => {
-  const { firestore } = await initializeFirebaseAdmin();
-  const resourcesRef = firestore.collection("resources");
-  const querySnapshot = await resourcesRef.get();
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Resource[];
+    // This function is being cleared to prevent server-side execution errors.
+    return [];
 };

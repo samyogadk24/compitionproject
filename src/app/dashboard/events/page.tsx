@@ -1,3 +1,5 @@
+
+'use client';
 import {
   Card,
   CardContent,
@@ -6,12 +8,44 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CalendarDays, PartyPopper } from "lucide-react";
-import { getEvents } from "@/lib/data";
+import { useCollection } from "@/firebase/firestore/use-collection";
+import { useFirestore, useMemoFirebase } from "@/firebase";
+import { collection, query, orderBy, Query } from "firebase/firestore";
+import type { Event } from "@/lib/definitions";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export const dynamic = 'force-dynamic';
+function PageSkeleton() {
+    return (
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {[...Array(3)].map((_, i) => (
+          <Card key={i}>
+            <CardHeader>
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-4 w-1/2 mt-2" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-4 w-full" />
+               <Skeleton className="h-4 w-2/3 mt-2" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
-export default async function EventsPage() {
-  const events = await getEvents();
+export default function EventsPage() {
+  const firestore = useFirestore();
+
+  const eventsQuery = useMemoFirebase(() => {
+      if (!firestore) return null;
+      return query(
+          collection(firestore, "events"), 
+          orderBy("date", "desc")
+      ) as Query<Event>;
+  }, [firestore]);
+  
+  const { data: events, isLoading } = useCollection<Event>(eventsQuery);
+
 
   return (
     <div className="flex-1 bg-background">
@@ -26,22 +60,24 @@ export default async function EventsPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {events.map((event) => (
-            <Card key={event.id} className="flex flex-col transition-shadow hover:shadow-md">
-              <CardHeader>
-                <CardTitle className="font-headline">{event.title}</CardTitle>
-                <CardDescription className="flex items-center gap-2 text-sm pt-1">
-                  <CalendarDays className="w-4 h-4" />
-                  <span>{new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}</span>
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex-1">
-                <p>{event.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {isLoading ? <PageSkeleton /> : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {events?.map((event) => (
+                <Card key={event.id} className="flex flex-col transition-shadow hover:shadow-md">
+                <CardHeader>
+                    <CardTitle className="font-headline">{event.title}</CardTitle>
+                    <CardDescription className="flex items-center gap-2 text-sm pt-1">
+                    <CalendarDays className="w-4 h-4" />
+                    <span>{new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}</span>
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1">
+                    <p>{event.description}</p>
+                </CardContent>
+                </Card>
+            ))}
+            </div>
+        )}
       </div>
     </div>
   );
