@@ -13,6 +13,16 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useUser } from "@/firebase/auth/use-user";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
 
 const navLinksData = [
     { href: "/", label: "Home" },
@@ -38,7 +48,7 @@ export default function Header() {
   const getNavLink = (link: {href: string, label: string, auth?: boolean}) => {
     if (user && link.href !== "/") {
         if(link.auth) {
-            return { ...link, href: `/dashboard${link.href}` };
+            return { ...link, href: `/dashboard/students` };
         }
         return { ...link, href: `/dashboard${link.href}` };
     }
@@ -60,26 +70,48 @@ export default function Header() {
     }
 
     if (user) {
+        const initials = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase();
       return (
         <div className="hidden md:flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/dashboard">
-                <LayoutDashboard />
-                Dashboard
-            </Link>
-          </Button>
-          {user.role === 'teacher' && (
-             <Button asChild variant="ghost" size="sm">
-                <Link href="/teacher/dashboard">
-                  <Shield />
-                  Teacher Zone
-                </Link>
-              </Button>
-          )}
-           <Button onClick={handleLogout} size="sm" variant="destructive">
-            <LogOut />
-            Logout
-          </Button>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                        <Avatar className="h-8 w-8">
+                            <AvatarFallback>{initials}</AvatarFallback>
+                        </Avatar>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{user.firstName} {user.lastName}</p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                        {user.email}
+                        </p>
+                    </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                        <Link href="/dashboard">
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            <span>Dashboard</span>
+                        </Link>
+                    </DropdownMenuItem>
+                    {user.role === 'teacher' && (
+                        <DropdownMenuItem asChild>
+                            <Link href="/teacher/dashboard">
+                                <Shield className="mr-2 h-4 w-4" />
+                                <span>Teacher Zone</span>
+                            </Link>
+                        </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Log out</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
         </div>
       );
     }
@@ -149,22 +181,20 @@ export default function Header() {
           <span className="font-headline text-2xl">SchoolPulse</span>
         </Link>
         
-        {hasMounted && (
-            <nav className="hidden md:flex items-center gap-2">
-            {navLinks.map((link) => (
-                <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                    "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent/50 hover:text-accent-foreground",
-                    pathname === link.href ? "bg-accent/80 text-accent-foreground" : "text-muted-foreground"
-                )}
-                >
-                {link.label}
-                </Link>
-            ))}
-            </nav>
-        )}
+        <nav className="hidden md:flex items-center gap-1">
+        {navLinks.map((link) => (
+            <Link
+            key={link.href}
+            href={link.href}
+            className={cn(
+                "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent/50 hover:text-accent-foreground",
+                pathname === link.href ? "bg-accent/80 text-accent-foreground" : "text-muted-foreground"
+            )}
+            >
+            {link.label}
+            </Link>
+        ))}
+        </nav>
 
         <div className="flex items-center gap-2">
             <AuthButtons />
@@ -181,23 +211,21 @@ export default function Header() {
                   <SchoolPulseLogo className="h-7 w-7 text-primary" />
                   <span className="font-headline">SchoolPulse</span>
                 </Link>
-              {hasMounted && (
-                <nav className="flex flex-col gap-2">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className={cn(
-                        "rounded-md px-3 py-2 text-base font-medium transition-colors hover:bg-accent/50 hover:text-accent-foreground",
-                        pathname === link.href ? "bg-accent/80 text-accent-foreground" : "text-muted-foreground"
-                      )}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                </nav>
-              )}
+              <nav className="flex flex-col gap-2">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      "rounded-md px-3 py-2 text-base font-medium transition-colors hover:bg-accent/50 hover:text-accent-foreground",
+                      pathname === link.href ? "bg-accent/80 text-accent-foreground" : "text-muted-foreground"
+                    )}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
               <div className="flex-1" />
               <MobileAuthButtons />
             </SheetContent>
