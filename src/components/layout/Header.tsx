@@ -17,7 +17,6 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/announcements", label: "Announcements" },
   { href: "/events", label: "Events" },
-  { href: "/students", label: "Directory" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -25,7 +24,7 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const auth = useAuth();
-  const { user, isUserLoading } = useUser();
+  const { user, isUserLoading: isUserLoading } = useUser();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
 
@@ -40,11 +39,7 @@ export default function Header() {
   };
 
   const AuthButtons = () => {
-    if (!hasMounted) {
-      return null;
-    }
-
-    if (isUserLoading) {
+    if (!hasMounted || isUserLoading) {
       return <div className="h-9 w-24 rounded-md bg-muted animate-pulse hidden md:block" />;
     }
 
@@ -86,13 +81,9 @@ export default function Header() {
   const MobileAuthButtons = () => {
     const closeMenu = () => setIsMobileMenuOpen(false);
 
-    if (!hasMounted) {
-      return null;
-    }
-
-    if (isUserLoading) {
+    if (!hasMounted || isUserLoading) {
       return (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 mt-auto">
            <div className="h-10 w-full rounded-md bg-muted animate-pulse" />
         </div>
       );
