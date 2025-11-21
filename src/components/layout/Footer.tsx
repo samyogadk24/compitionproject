@@ -8,6 +8,9 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 mt-4 md:mt-0">
           <p>123 Education Lane, Knowledge City, 12345</p>
           <div className="flex gap-4">
+            <Link href="/teacher/login" className="hover:text-primary transition-colors">
+              Teacher Login
+            </Link>
             <Link href="#" className="hover:text-primary transition-colors">
               Privacy Policy
             </Link>
