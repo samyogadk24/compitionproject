@@ -66,7 +66,7 @@ service cloud.firestore {
      */
     match /students/{studentId} {
       allow get: if isOwner(studentId);
-      allow list: if isSignedIn(); // Allow any authenticated user to list students for the directory.
+      allow list: if true; // Allow anyone to list students for the directory.
       allow create: if isOwner(studentId) && request.resource.data.id == request.auth.uid;
       allow update: if isOwner(studentId) && resource != null && request.resource.data.id == resource.data.id;
       allow delete: if isOwner(studentId) && resource != null;
