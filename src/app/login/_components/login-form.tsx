@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -43,7 +44,15 @@ function SignInForm() {
       const userResult = await getUserByUsername(username);
 
       if (!userResult?.email) {
-        throw new Error("Invalid username or password. Please try again or register a new account.");
+        const errorMessage = "Invalid username or password. Please try again or register a new account.";
+        setError(errorMessage);
+        toast({
+          title: "Login Failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        setIsSigningIn(false);
+        return;
       }
 
       await signInWithEmailAndPassword(auth, userResult.email, password);
@@ -263,5 +272,3 @@ export default function LoginForm() {
     </Tabs>
   );
 }
-
-    
