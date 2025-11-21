@@ -22,10 +22,10 @@ const baseNavLinks = [
 ];
 
 const authenticatedNavLinks = [
+    { href: "/dashboard", label: "Dashboard" },
     { href: "/dashboard/announcements", label: "Announcements" },
     { href: "/dashboard/events", label: "Events" },
     { href: "/dashboard/students", label: "Directory" },
-    { href: "/contact", label: "Contact" },
 ];
 
 
@@ -57,26 +57,20 @@ export default function Header() {
 
     if (user) {
       return (
-        <>
+        <div className="hidden md:flex items-center gap-2">
           {user.role === 'teacher' && (
-             <Button asChild variant="ghost" size="sm" className="hidden md:flex">
+             <Button asChild variant="ghost" size="sm">
                 <Link href="/teacher/dashboard">
                   <Shield />
                   Teacher Zone
                 </Link>
               </Button>
           )}
-          <Button asChild variant="ghost" size="sm" className="hidden md:flex">
-            <Link href="/dashboard">
-              <LayoutDashboard />
-              Dashboard
-            </Link>
-          </Button>
-          <Button onClick={handleLogout} size="sm" variant="destructive" className="hidden md:flex">
+          <Button onClick={handleLogout} size="sm" variant="destructive">
             <LogOut />
             Logout
           </Button>
-        </>
+        </div>
       );
     }
 
@@ -112,12 +106,6 @@ export default function Header() {
               </Link>
             </Button>
           )}
-          <Button asChild variant="outline" size="sm" onClick={closeMenu}>
-            <Link href="/dashboard">
-              <LayoutDashboard />
-              Dashboard
-            </Link>
-          </Button>
           <Button onClick={() => { handleLogout(); closeMenu(); }} size="sm" variant="destructive">
             <LogOut />
             Logout
@@ -144,6 +132,7 @@ export default function Header() {
           <SchoolPulseLogo className="h-8 w-8 text-primary" />
           <span className="font-headline text-2xl">SchoolPulse</span>
         </Link>
+        
         {hasMounted && (
             <nav className="hidden md:flex items-center gap-2">
             {navLinks.map((link) => (
@@ -160,8 +149,10 @@ export default function Header() {
             ))}
             </nav>
         )}
+
         <div className="flex items-center gap-2">
             <AuthButtons />
+
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="md:hidden">

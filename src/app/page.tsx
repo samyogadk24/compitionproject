@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CalendarDays, Library, Megaphone, PartyPopper } from "lucide-react";
+import { ArrowRight, CalendarDays, Library, Megaphone, PartyPopper, Shield } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { generateAnnouncements } from "@/ai/flows/generate-announcements-flow";
 import { generateEvents } from "@/ai/flows/generate-events-flow";
@@ -18,7 +18,7 @@ const featureCards = [
   {
     title: "Student Portal",
     description: "Access your dashboard.",
-    href: "/dashboard",
+    href: "/login",
     icon: <Library className="w-8 h-8 text-primary" />,
   },
   {
@@ -31,7 +31,7 @@ const featureCards = [
     title: "Teacher Zone",
     description: "Manage school content.",
     href: "/teacher/login",
-    icon: <CalendarDays className="w-8 h-8 text-primary" />,
+    icon: <Shield className="w-8 h-8 text-primary" />,
   },
 ];
 

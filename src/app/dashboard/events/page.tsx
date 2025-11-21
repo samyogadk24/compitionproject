@@ -15,23 +15,23 @@ import type { Event } from "@/lib/definitions";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function PageSkeleton() {
-    return (
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {[...Array(3)].map((_, i) => (
-          <Card key={i}>
-            <CardHeader>
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="h-4 w-1/2 mt-2" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-4 w-full" />
-               <Skeleton className="h-4 w-2/3 mt-2" />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
+  return (
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {[...Array(3)].map((_, i) => (
+        <Card key={i}>
+          <CardHeader>
+            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-4 w-1/2 mt-2" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-4 w-full" />
+             <Skeleton className="h-4 w-2/3 mt-2" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
 
 export default function EventsPage() {
   const firestore = useFirestore();
