@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useCollection } from "@/firebase/firestore/use-collection";
 import { useFirestore, useAuth, useMemoFirebase } from "@/firebase";
-import { collection, query, orderBy, addDoc, updateDoc, deleteDoc, doc, Query } from "firebase/firestore";
+import { collection, query, orderBy, addDoc, updateDoc, deleteDoc, doc, Query, where } from "firebase/firestore";
 import type { Event } from "@/lib/definitions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PlusCircle, Edit, Trash2 } from "lucide-react";
 import { useUser } from "@/firebase/auth/use-user";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 type EventFormData = Omit<Event, "id" | "authorId" | "date"> & { date: string };
 
@@ -75,13 +77,17 @@ export default function EventsManager() {
 
   const eventsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
-    return query(collection(firestore, "events"), orderBy("date", "desc")) as Query<Event>;
+    return query(
+        collection(firestore, "events"), 
+        where("authorId", "==", user.id),
+        orderBy("date", "desc")
+    ) as Query<Event>;
   }, [firestore, user]);
 
   const { data: events, isLoading } = useCollection<Event>(eventsQuery);
   const auth = useAuth();
   
-  const handleSave = async (data: EventFormData) => {
+  const handleSave = (data: EventFormData) => {
     if (!firestore || !auth.currentUser) return;
 
     const eventData = {
@@ -92,16 +98,31 @@ export default function EventsManager() {
 
     if (editingEvent) {
       const docRef = doc(firestore, "events", editingEvent.id);
-      await updateDoc(docRef, eventData);
+      updateDoc(docRef, eventData)
+        .catch(err => errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: docRef.path,
+            operation: 'update',
+            requestResourceData: eventData
+        })));
     } else {
-      await addDoc(collection(firestore, "events"), eventData);
+      addDoc(collection(firestore, "events"), eventData)
+        .catch(err => errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: `events`,
+            operation: 'create',
+            requestResourceData: eventData
+        })));
     }
   };
   
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
       if(!firestore) return;
       if (confirm("Are you sure you want to delete this event?")) {
-        await deleteDoc(doc(firestore, "events", id));
+        const docRef = doc(firestore, "events", id);
+        deleteDoc(docRef)
+            .catch(err => errorEmitter.emit('permission-error', new FirestorePermissionError({
+                path: docRef.path,
+                operation: 'delete',
+            })));
       }
   }
 

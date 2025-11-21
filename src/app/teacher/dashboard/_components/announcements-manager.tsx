@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PlusCircle, Edit, Trash2 } from "lucide-react";
 import { useUser } from "@/firebase/auth/use-user";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 type AnnouncementFormData = Omit<Announcement, "id" | "authorId" | "date"> & { date: string };
 
@@ -83,7 +85,7 @@ export default function AnnouncementsManager() {
     if (!firestore || !user) return null;
     return query(
         collection(firestore, "announcements"), 
-        // where("authorId", "==", user.id), // a teacher can see all announcements
+        where("authorId", "==", user.id),
         orderBy("date", "desc")
     ) as Query<Announcement>;
   }, [firestore, user]);
@@ -91,7 +93,7 @@ export default function AnnouncementsManager() {
   const { data: announcements, isLoading } = useCollection<Announcement>(announcementsQuery);
   const auth = useAuth();
   
-  const handleSave = async (data: AnnouncementFormData) => {
+  const handleSave = (data: AnnouncementFormData) => {
     if (!firestore || !auth.currentUser) return;
     
     const announcementData = {
@@ -102,16 +104,31 @@ export default function AnnouncementsManager() {
 
     if (editingAnnouncement) {
       const docRef = doc(firestore, "announcements", editingAnnouncement.id);
-      await updateDoc(docRef, announcementData);
+      updateDoc(docRef, announcementData)
+        .catch(err => errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: docRef.path,
+            operation: 'update',
+            requestResourceData: announcementData
+        })));
     } else {
-      await addDoc(collection(firestore, "announcements"), announcementData);
+      addDoc(collection(firestore, "announcements"), announcementData)
+        .catch(err => errorEmitter.emit('permission-error', new FirestorePermissionError({
+            path: `announcements`,
+            operation: 'create',
+            requestResourceData: announcementData
+        })));
     }
   };
   
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
       if(!firestore) return;
       if (confirm("Are you sure you want to delete this announcement?")) {
-        await deleteDoc(doc(firestore, "announcements", id));
+        const docRef = doc(firestore, "announcements", id);
+        deleteDoc(docRef)
+            .catch(err => errorEmitter.emit('permission-error', new FirestorePermissionError({
+                path: docRef.path,
+                operation: 'delete',
+            })));
       }
   }
 
