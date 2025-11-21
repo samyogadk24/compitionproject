@@ -1,9 +1,3 @@
 
-export const firebaseConfig = {
-  "projectId": "studio-4076783756-378fc",
-  "appId": "1:333736746942:web:fa3caea2399c85f62723ef",
-  "apiKey": "AIzaSyDZVoDfJFXq-zsyNpIWnMbv1cTbfL8m8o0",
-  "authDomain": "studio-4076783756-378fc.firebaseapp.com",
-  "measurementId": "",
-  "messagingSenderId": "333736746942"
-};
+// This file is intentionally left blank as Firebase features have been removed.
+export const firebaseConfig = {};

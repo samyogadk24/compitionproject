@@ -1,29 +1,25 @@
-import { initializeApp, getApps, FirebaseApp } from "firebase/app";
-import { getAuth, Auth } from "firebase/auth";
-import { getFirestore, Firestore } from "firebase/firestore";
-import { firebaseConfig } from "./config";
+import { FirebaseApp } from "firebase/app";
+import { Auth } from "firebase/auth";
+import { Firestore } from "firebase/firestore";
 
-import {
-  FirebaseProvider,
-  useFirebaseApp,
-  useAuth,
-  useFirestore,
-} from "./provider";
-import { FirebaseClientProvider } from "./client-provider";
-import { useUser } from "./auth/use-user";
-
-let firebaseApp: FirebaseApp;
-let auth: Auth;
-let firestore: Firestore;
+// These are now stubs since Firebase functionality is removed.
+let firebaseApp: FirebaseApp | null = null;
+let auth: Auth | null = null;
+let firestore: Firestore | null = null;
 
 function initializeFirebase() {
-  if (getApps().length === 0) {
-    firebaseApp = initializeApp(firebaseConfig);
-    auth = getAuth(firebaseApp);
-    firestore = getFirestore(firebaseApp);
-  }
+  // No-op
   return { firebaseApp, auth, firestore };
 }
+
+// Export stubs
+const FirebaseProvider = ({ children }: { children: React.ReactNode }) => children;
+const FirebaseClientProvider = ({ children }: { children: React.ReactNode }) => children;
+const useUser = () => ({ user: null, loading: false });
+const useFirebaseApp = () => null;
+const useAuth = () => null;
+const useFirestore = () => null;
+
 
 export {
   initializeFirebase,

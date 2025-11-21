@@ -25,11 +25,9 @@ import {
   User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useUser } from "@/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardPage() {
-  const { user, loading: userLoading } = useUser();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
@@ -106,7 +104,7 @@ export default function DashboardPage() {
     </div>
   );
 
-  if (userLoading || loading) {
+  if (loading) {
     return (
       <div className="flex-1 bg-background">
         <PageSkeleton />
@@ -124,7 +122,7 @@ export default function DashboardPage() {
               Student Dashboard
             </h1>
             <p className="text-muted-foreground">
-              Welcome back, {user?.displayName?.split(" ")[0] || "Student"}!
+              Welcome, Student!
             </p>
           </div>
         </div>

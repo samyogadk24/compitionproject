@@ -1,46 +1,7 @@
 {
-  "entities": {
-    "Student": {
-      "title": "Student",
-      "description": "Represents a student user in the system.",
-      "type": "object",
-      "properties": {
-        "uid": {
-          "type": "string",
-          "description": "The unique identifier for the student, matching the Firebase Auth UID."
-        },
-        "email": {
-          "type": "string",
-          "format": "email",
-          "description": "The student's email address."
-        },
-        "displayName": {
-          "type": "string",
-          "description": "The student's full name."
-        },
-        "photoURL": {
-          "type": "string",
-          "format": "uri",
-          "description": "URL of the student's profile picture."
-        },
-        "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The date and time the student profile was created."
-        }
-      },
-      "required": ["uid", "email", "displayName"]
-    }
-  },
+  "entities": {},
   "auth": {
-    "providers": ["google.com"]
+    "providers": []
   },
-  "firestore": {
-    "/students/{studentId}": {
-      "schema": {
-        "$ref": "#/entities/Student"
-      },
-      "description": "Stores individual student profile data."
-    }
-  }
+  "firestore": {}
 }

@@ -1,30 +1,33 @@
 "use client";
 
-import { createContext, useContext } from "react";
-import { FirebaseApp } from "firebase/app";
-import { Auth } from "firebase/auth";
-import { Firestore } from "firebase/firestore";
+import { createContext, useContext, ReactNode } from "react";
+import type { FirebaseApp } from "firebase/app";
+import type { Auth } from "firebase/auth";
+import type { Firestore } from "firebase/firestore";
 
+// Define a type for the context value that allows for nulls
 interface FirebaseContextValue {
   firebaseApp: FirebaseApp | null;
   auth: Auth | null;
   firestore: Firestore | null;
 }
 
+// Create the context with a default null value
 const FirebaseContext = createContext<FirebaseContextValue>({
   firebaseApp: null,
   auth: null,
   firestore: null,
 });
 
+// The provider component
 export const FirebaseProvider = ({
   children,
   ...props
 }: {
-  children: React.ReactNode;
-  firebaseApp: FirebaseApp;
-  auth: Auth;
-  firestore: Firestore;
+  children: ReactNode;
+  firebaseApp: FirebaseApp | null; // Allow null
+  auth: Auth | null; // Allow null
+  firestore: Firestore | null; // Allow null
 }) => {
   return (
     <FirebaseContext.Provider value={props}>
@@ -33,6 +36,7 @@ export const FirebaseProvider = ({
   );
 };
 
+// Custom hooks to use the Firebase context
 export const useFirebaseApp = () => {
   const context = useContext(FirebaseContext);
   if (context === undefined) {
