@@ -143,7 +143,7 @@ export default function DashboardPage() {
                 {user?.role === 'teacher' ? 'Teacher' : 'Student'} Dashboard
                 </h1>
                 <p className="text-muted-foreground">
-                Welcome, {user?.firstName || 'User'}!
+                Welcome, {user?.firstName}!
                 </p>
             </div>
             </div>
