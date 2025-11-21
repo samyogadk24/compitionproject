@@ -13,7 +13,7 @@ import { useAuth, useFirestore, setDocumentNonBlocking } from "@/firebase";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Chrome } from "lucide-react";
+import { AlertCircle, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,7 @@ function SignInForm() {
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -74,9 +75,26 @@ function SignInForm() {
           required
         />
       </div>
-      <div className="space-y-2">
+      <div className="space-y-2 relative">
         <Label htmlFor="password">Password</Label>
-        <Input id="password" name="password" type="password" required />
+        <Input
+          id="password"
+          name="password"
+          type={showPassword ? "text" : "password"}
+          required
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="absolute bottom-1 right-1 h-7 w-7"
+          onClick={() => setShowPassword(!showPassword)}
+        >
+          {showPassword ? <EyeOff /> : <Eye />}
+          <span className="sr-only">
+            {showPassword ? "Hide password" : "Show password"}
+          </span>
+        </Button>
       </div>
       <Button type="submit" className="w-full" disabled={isSigningIn}>
         {isSigningIn ? "Signing In..." : "Sign In"}
@@ -92,6 +110,7 @@ function RegisterForm() {
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -107,11 +126,11 @@ function RegisterForm() {
     const lastName = formData.get("lastName") as string;
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-    
+
     if (password.length < 6) {
-        setError("Password must be at least 6 characters long.");
-        setIsRegistering(false);
-        return;
+      setError("Password must be at least 6 characters long.");
+      setIsRegistering(false);
+      return;
     }
 
     try {
@@ -157,12 +176,12 @@ function RegisterForm() {
       )}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-            <Label htmlFor="firstName">First Name</Label>
-            <Input id="firstName" name="firstName" placeholder="John" required />
+          <Label htmlFor="firstName">First Name</Label>
+          <Input id="firstName" name="firstName" placeholder="John" required />
         </div>
         <div className="space-y-2">
-            <Label htmlFor="lastName">Last Name</Label>
-            <Input id="lastName" name="lastName" placeholder="Doe" required />
+          <Label htmlFor="lastName">Last Name</Label>
+          <Input id="lastName" name="lastName" placeholder="Doe" required />
         </div>
       </div>
       <div className="space-y-2">
@@ -175,9 +194,26 @@ function RegisterForm() {
           required
         />
       </div>
-      <div className="space-y-2">
+      <div className="space-y-2 relative">
         <Label htmlFor="password">Password</Label>
-        <Input id="password" name="password" type="password" required />
+        <Input
+          id="password"
+          name="password"
+          type={showPassword ? "text" : "password"}
+          required
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="absolute bottom-1 right-1 h-7 w-7"
+          onClick={() => setShowPassword(!showPassword)}
+        >
+          {showPassword ? <EyeOff /> : <Eye />}
+          <span className="sr-only">
+            {showPassword ? "Hide password" : "Show password"}
+          </span>
+        </Button>
       </div>
       <Button type="submit" className="w-full" disabled={isRegistering}>
         {isRegistering ? "Registering..." : "Register"}
@@ -186,20 +222,19 @@ function RegisterForm() {
   );
 }
 
-
 export default function LoginForm() {
-    return (
-        <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Sign In</TabsTrigger>
-                <TabsTrigger value="register">Register</TabsTrigger>
-            </TabsList>
-            <TabsContent value="signin" className="mt-4">
-               <SignInForm />
-            </TabsContent>
-            <TabsContent value="register" className="mt-4">
-                <RegisterForm />
-            </TabsContent>
-        </Tabs>
-    )
+  return (
+    <Tabs defaultValue="signin" className="w-full">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="signin">Sign In</TabsTrigger>
+        <TabsTrigger value="register">Register</TabsTrigger>
+      </TabsList>
+      <TabsContent value="signin" className="mt-4">
+        <SignInForm />
+      </TabsContent>
+      <TabsContent value="register" className="mt-4">
+        <RegisterForm />
+      </TabsContent>
+    </Tabs>
+  );
 }
