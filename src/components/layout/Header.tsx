@@ -15,17 +15,16 @@ import { signOut } from "firebase/auth";
 import { useUser } from "@/firebase/auth/use-user";
 
 const baseNavLinks = [
-  { href: "/", label: "Home" },
-  { href: "/announcements", label: "Announcements" },
-  { href: "/events", label: "Events" },
-  { href: "/contact", label: "Contact" },
+    { href: "/", label: "Home" },
+    { href: "/announcements", label: "Announcements" },
+    { href: "/events", label: "Events" },
+    { href: "/contact", label: "Contact" },
 ];
 
 const authenticatedNavLinks = [
     { href: "/dashboard/announcements", label: "Announcements" },
     { href: "/dashboard/events", label: "Events" },
     { href: "/dashboard/students", label: "Directory" },
-    { href: "/dashboard/contact", label: "Contact" },
 ];
 
 
@@ -145,7 +144,7 @@ export default function Header() {
           <span className="font-headline text-2xl">SchoolPulse</span>
         </Link>
         <nav className="hidden md:flex items-center gap-2">
-          {navLinks.map((link) => (
+          {hasMounted && navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -173,7 +172,7 @@ export default function Header() {
                   <span className="font-headline">SchoolPulse</span>
                 </Link>
               <nav className="flex flex-col gap-2">
-                {navLinks.map((link) => (
+                {hasMounted && navLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
