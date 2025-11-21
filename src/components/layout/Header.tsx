@@ -16,10 +16,12 @@ import { useUser } from "@/firebase/auth/use-user";
 
 const baseNavLinks = [
   { href: "/", label: "Home" },
+  { href: "/announcements", label: "Announcements" },
+  { href: "/events", label: "Events" },
+  { href: "/contact", label: "Contact" },
 ];
 
 const authenticatedNavLinks = [
-    { href: "/dashboard", label: "Dashboard" },
     { href: "/dashboard/announcements", label: "Announcements" },
     { href: "/dashboard/events", label: "Events" },
     { href: "/dashboard/students", label: "Directory" },
