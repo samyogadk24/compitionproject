@@ -33,7 +33,7 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const auth = useAuth();
-  const { user, isUserLoading: userLoading } = useUser();
+  const { user, loading: userLoading } = useUser();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
 
@@ -60,7 +60,7 @@ export default function Header() {
         <>
           {user.role === 'teacher' && (
              <Button asChild variant="ghost" size="sm" className="hidden md:flex">
-                <Link href="/teacher/login">
+                <Link href="/teacher/dashboard">
                   <Shield />
                   Teacher Zone
                 </Link>
@@ -106,7 +106,7 @@ export default function Header() {
         <div className="flex flex-col gap-2 mt-auto">
           {user.role === 'teacher' && (
             <Button asChild variant="outline" size="sm" onClick={closeMenu}>
-              <Link href="/teacher/login">
+              <Link href="/teacher/dashboard">
                 <Shield />
                 Teacher Zone
               </Link>
@@ -144,20 +144,22 @@ export default function Header() {
           <SchoolPulseLogo className="h-8 w-8 text-primary" />
           <span className="font-headline text-2xl">SchoolPulse</span>
         </Link>
-        <nav className="hidden md:flex items-center gap-2">
-          {hasMounted && navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent/50 hover:text-accent-foreground",
-                pathname === link.href ? "bg-accent/80 text-accent-foreground" : "text-muted-foreground"
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        {hasMounted && (
+            <nav className="hidden md:flex items-center gap-2">
+            {navLinks.map((link) => (
+                <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                    "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent/50 hover:text-accent-foreground",
+                    pathname === link.href ? "bg-accent/80 text-accent-foreground" : "text-muted-foreground"
+                )}
+                >
+                {link.label}
+                </Link>
+            ))}
+            </nav>
+        )}
         <div className="flex items-center gap-2">
             <AuthButtons />
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
@@ -172,21 +174,23 @@ export default function Header() {
                   <SchoolPulseLogo className="h-7 w-7 text-primary" />
                   <span className="font-headline">SchoolPulse</span>
                 </Link>
-              <nav className="flex flex-col gap-2">
-                {hasMounted && navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={cn(
-                      "rounded-md px-3 py-2 text-base font-medium transition-colors hover:bg-accent/50 hover:text-accent-foreground",
-                      pathname === link.href ? "bg-accent/80 text-accent-foreground" : "text-muted-foreground"
-                    )}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </nav>
+              {hasMounted && (
+                <nav className="flex flex-col gap-2">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={cn(
+                        "rounded-md px-3 py-2 text-base font-medium transition-colors hover:bg-accent/50 hover:text-accent-foreground",
+                        pathname === link.href ? "bg-accent/80 text-accent-foreground" : "text-muted-foreground"
+                      )}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </nav>
+              )}
               <div className="flex-1" />
               <MobileAuthButtons />
             </SheetContent>
