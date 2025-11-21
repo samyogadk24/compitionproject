@@ -24,8 +24,11 @@ export type Resource = {
 
 export type UserProfile = {
   id: string;
+  username: string;
   firstName: string;
   lastName: string;
   email: string | null;
   role: 'student' | 'teacher';
 };
+
+    

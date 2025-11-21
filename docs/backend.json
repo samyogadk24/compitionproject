@@ -124,6 +124,10 @@
           "type": "string",
           "description": "Unique identifier for the user, matching Firebase Auth UID."
         },
+        "username": {
+          "type": "string",
+          "description": "The user's unique username."
+        },
         "firstName": {
           "type": "string",
           "description": "First name of the user."
@@ -148,6 +152,7 @@
       },
       "required": [
         "id",
+        "username",
         "firstName",
         "lastName",
         "email",
@@ -278,3 +283,4 @@
     "reasoning": "The Firestore structure is designed to support SchoolPulse's features. User data is stored in `/users/{userId}` using Path-Based ownership. Announcements, Events, Contact Messages and Resources are stored in root collections. Segregating data into top-level collections simplifies querying and management. User data is kept separate, accessible based on role, ensuring privacy and security. The 'userId' parameter links Firebase Authentication with Firestore documents. The structure does not rely on any hierarchical authorization dependencies, ensuring atomic operations and ease of debugging."
   }
 }
+    

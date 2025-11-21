@@ -58,6 +58,7 @@ service cloud.firestore {
     // ----------------------------------------------------------------------
     match /users/{userId} {
       allow get: if isOwner(userId) || isSignedIn();
+      // Allow list for username lookup during login.
       allow list: if true; 
       allow create: if isOwner(userId) && request.resource.data.id == request.auth.uid;
       // Prevent users from changing their own role.
@@ -102,3 +103,5 @@ service cloud.firestore {
     }
   }
 }
+
+    

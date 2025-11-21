@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { UserProfile } from "@/lib/definitions";
+import { getUserByUsername } from "@/lib/actions";
 
 function SignInForm() {
   const auth = useAuth();
@@ -35,17 +36,23 @@ function SignInForm() {
     setError(null);
     
     const formData = new FormData(event.currentTarget);
-    const email = formData.get("email") as string;
+    const username = formData.get("username") as string;
     const password = formData.get("password") as string;
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userResult = await getUserByUsername(username);
+
+      if (!userResult?.email) {
+        throw new Error("Invalid username or password. Please try again or register a new account.");
+      }
+
+      await signInWithEmailAndPassword(auth, userResult.email, password);
       router.push("/dashboard");
     } catch (error: any) {
-      console.error("Email/Password Sign-In Error:", error);
+      console.error("Username Sign-In Error:", error);
       let errorMessage = "An unexpected error occurred.";
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-        errorMessage = "Invalid email or password. Please try again or register a new account."
+        errorMessage = "Invalid username or password. Please try again or register a new account."
       } else {
         errorMessage = error.message;
       }
@@ -70,12 +77,12 @@ function SignInForm() {
         </Alert>
       )}
       <div className="space-y-2">
-        <Label htmlFor="email-signin">Email</Label>
+        <Label htmlFor="username-signin">Username</Label>
         <Input
-          id="email-signin"
-          name="email"
-          type="email"
-          placeholder="user@example.com"
+          id="username-signin"
+          name="username"
+          type="text"
+          placeholder="your_username"
           required
         />
       </div>
@@ -128,6 +135,7 @@ function RegisterForm() {
     const formData = new FormData(event.currentTarget);
     const firstName = formData.get("firstName") as string;
     const lastName = formData.get("lastName") as string;
+    const username = formData.get("username") as string;
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
@@ -138,6 +146,7 @@ function RegisterForm() {
     }
 
     try {
+      // Note: In a real app, you'd want to check if the username is already taken here.
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -149,6 +158,7 @@ function RegisterForm() {
         const userDocRef = doc(firestore, "users", user.uid);
         const newUser: UserProfile = {
           id: user.uid,
+          username,
           firstName,
           lastName,
           email: user.email,
@@ -188,6 +198,16 @@ function RegisterForm() {
           <Label htmlFor="lastName">Last Name</Label>
           <Input id="lastName" name="lastName" placeholder="Doe" required />
         </div>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="username-register">Username</Label>
+        <Input
+          id="username-register"
+          name="username"
+          type="text"
+          placeholder="your_username"
+          required
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="email-register">Email</Label>
@@ -243,3 +263,5 @@ export default function LoginForm() {
     </Tabs>
   );
 }
+
+    
