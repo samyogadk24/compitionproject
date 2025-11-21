@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -13,10 +14,14 @@ import { useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useUser } from "@/firebase/auth/use-user";
 
-const navLinks = [
+const baseNavLinks = [
   { href: "/", label: "Home" },
-  { href: "/students", label: "Directory" },
 ];
+
+const authenticatedNavLinks = [
+    { href: "/students", label: "Directory" },
+];
+
 
 export default function Header() {
   const pathname = usePathname();
@@ -29,6 +34,9 @@ export default function Header() {
   useEffect(() => {
     setHasMounted(true);
   }, []);
+  
+  const navLinks = hasMounted && user ? [...baseNavLinks, ...authenticatedNavLinks] : baseNavLinks;
+
 
   const handleLogout = async () => {
     if (!auth) return;
