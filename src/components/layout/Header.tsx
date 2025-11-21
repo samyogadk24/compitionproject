@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SchoolPulseLogo } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { Menu, LogIn, LogOut, LayoutDashboard } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -27,6 +27,11 @@ export default function Header() {
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const handleLogout = async () => {
     if (!auth) return;
@@ -35,7 +40,7 @@ export default function Header() {
   };
 
   const AuthButtons = () => {
-    if (isUserLoading) {
+    if (!hasMounted || isUserLoading) {
       return <div className="h-9 w-24 rounded-md bg-muted animate-pulse hidden md:block" />;
     }
 
@@ -69,10 +74,9 @@ export default function Header() {
   const MobileAuthButtons = () => {
     const closeMenu = () => setIsMobileMenuOpen(false);
 
-    if (isUserLoading) {
+    if (!hasMounted || isUserLoading) {
       return (
         <div className="flex flex-col gap-2">
-           <div className="h-10 w-full rounded-md bg-muted animate-pulse" />
            <div className="h-10 w-full rounded-md bg-muted animate-pulse" />
         </div>
       );
