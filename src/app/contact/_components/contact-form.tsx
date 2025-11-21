@@ -1,54 +1,96 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
-import { useFormStatus } from "react-dom";
-import { submitContactForm } from "@/lib/actions";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+import { useFirestore } from "@/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" className="w-full" disabled={pending}>
-      {pending ? "Sending..." : "Send Message"}
-    </Button>
-  );
-}
+const ContactSchema = z.object({
+  name: z.string().min(1, "Name is required."),
+  email: z.string().email("Please enter a valid email."),
+  message: z.string().min(10, "Message must be at least 10 characters."),
+});
+
+type FormData = z.infer<typeof ContactSchema>;
+type FormErrors = { [key in keyof FormData]?: string[] };
 
 export default function ContactForm() {
-  const initialState = { message: null, errors: {} };
-  const [state, dispatch] = useActionState(submitContactForm, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
+  const firestore = useFirestore();
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (state.message && !state.errors) {
-      toast({
-        title: "Success!",
-        description: state.message,
-      });
-      formRef.current?.reset();
-    } else if (state.message && state.errors) {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setErrors({});
+    setIsSubmitting(true);
+
+    const formData = new FormData(event.currentTarget);
+    const validatedFields = ContactSchema.safeParse(
+      Object.fromEntries(formData.entries())
+    );
+
+    if (!validatedFields.success) {
+      const fieldErrors = validatedFields.error.flatten().fieldErrors;
+      setErrors(fieldErrors);
       toast({
         title: "Error",
-        description: state.message,
+        description: "Please check the form for errors.",
         variant: "destructive",
       });
+      setIsSubmitting(false);
+      return;
     }
-  }, [state, toast]);
+
+    if (!firestore) {
+      toast({
+        title: "Error",
+        description: "Database not available. Please try again later.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const messagesCollection = collection(firestore, 'contactMessages');
+      await addDoc(messagesCollection, {
+        ...validatedFields.data,
+        sentDate: serverTimestamp(),
+      });
+
+      toast({
+        title: "Success!",
+        description: "Your message has been sent successfully!",
+      });
+      formRef.current?.reset();
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description: "Could not send your message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <form ref={formRef} action={dispatch} className="space-y-4">
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="name">Name</Label>
           <Input id="name" name="name" placeholder="John Doe" required />
-          {state.errors?.name && (
+          {errors.name && (
             <p className="text-sm font-medium text-destructive">
-              {state.errors.name[0]}
+              {errors.name[0]}
             </p>
           )}
         </div>
@@ -61,9 +103,9 @@ export default function ContactForm() {
             placeholder="john@example.com"
             required
           />
-          {state.errors?.email && (
+          {errors.email && (
             <p className="text-sm font-medium text-destructive">
-              {state.errors.email[0]}
+              {errors.email[0]}
             </p>
           )}
         </div>
@@ -77,13 +119,15 @@ export default function ContactForm() {
           className="min-h-[120px]"
           required
         />
-        {state.errors?.message && (
+        {errors.message && (
           <p className="text-sm font-medium text-destructive">
-            {state.errors.message[0]}
+            {errors.message[0]}
           </p>
         )}
       </div>
-      <SubmitButton />
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? "Sending..." : "Send Message"}
+      </Button>
     </form>
   );
 }
