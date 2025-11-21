@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -26,57 +26,38 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUser } from "@/firebase/auth/use-user";
-import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
-import { useFirestore } from "@/firebase";
+import { collection, limit, orderBy, query, Query } from "firebase/firestore";
+import { useFirestore, useMemoFirebase } from "@/firebase";
 import Link from "next/link";
 import type { Announcement, Event, Resource } from "@/lib/definitions";
+import { useCollection } from "@/firebase/firestore/use-collection";
 
 
 export default function DashboardPage() {
   const { user, loading: userLoading } = useUser();
   const firestore = useFirestore();
 
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [events, setEvents] = useState<Event[]>([]);
-  const [resources, setResources] = useState<Resource[]>([]);
-  const [loadingData, setLoadingData] = useState(true);
-
-  useEffect(() => {
-    async function fetchData() {
-      if (!firestore) return;
-      try {
-        setLoadingData(true);
-
-        const announcementsQuery = query(collection(firestore, 'announcements'), orderBy('date', 'desc'), limit(3));
-        const eventsQuery = query(collection(firestore, 'events'), orderBy('date', 'desc'), limit(3));
-        const resourcesQuery = query(collection(firestore, 'resources'), limit(3));
-        
-        const [
-          announcementsSnapshot,
-          eventsSnapshot,
-          resourcesSnapshot,
-        ] = await Promise.all([
-          getDocs(announcementsQuery),
-          getDocs(eventsQuery),
-          getDocs(resourcesQuery),
-        ]);
-
-        const announcementsData = announcementsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Announcement[];
-        const eventsData = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Event[];
-        const resourcesData = resourcesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Resource[];
-
-        setAnnouncements(announcementsData);
-        setEvents(eventsData);
-        setResources(resourcesData);
-
-      } catch (error) {
-        console.error("Failed to fetch dashboard data", error);
-      } finally {
-        setLoadingData(false);
-      }
-    }
-    fetchData();
+  const announcementsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'announcements'), orderBy('date', 'desc'), limit(3)) as Query<Announcement>;
   }, [firestore]);
+
+  const eventsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'events'), orderBy('date', 'desc'), limit(3)) as Query<Event>;
+  }, [firestore]);
+
+  const resourcesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'resources'), limit(3)) as Query<Resource>;
+  }, [firestore]);
+
+  const { data: announcements, isLoading: loadingAnnouncements } = useCollection<Announcement>(announcementsQuery);
+  const { data: events, isLoading: loadingEvents } = useCollection<Event>(eventsQuery);
+  const { data: resources, isLoading: loadingResources } = useCollection<Resource>(resourcesQuery);
+  
+  const loadingData = loadingAnnouncements || loadingEvents || loadingResources;
+
 
   const PageSkeleton = () => (
     <div className="container mx-auto py-12 px-4 md:px-6">
@@ -124,7 +105,7 @@ export default function DashboardPage() {
     </div>
   );
 
-  if (userLoading || loadingData) {
+  if (userLoading) {
     return (
       <div className="flex-1 bg-background">
         <PageSkeleton />
@@ -143,7 +124,7 @@ export default function DashboardPage() {
                 {user?.role === 'teacher' ? 'Teacher' : 'Student'} Dashboard
                 </h1>
                 <p className="text-muted-foreground">
-                Welcome, {user?.firstName}!
+                  Welcome, {user?.firstName || 'User'}!
                 </p>
             </div>
             </div>
@@ -183,14 +164,18 @@ export default function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {announcements.map((item) => (
-                  <div key={item.id} className="p-4 border rounded-lg">
-                    <h3 className="font-semibold">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {item.shortDescription}
-                    </p>
-                  </div>
-                ))}
+                {loadingAnnouncements ? (
+                  [...Array(3)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)
+                ) : (
+                  announcements?.map((item) => (
+                    <div key={item.id} className="p-4 border rounded-lg">
+                      <h3 className="font-semibold">{item.title}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {item.shortDescription}
+                      </p>
+                    </div>
+                  ))
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -204,24 +189,28 @@ export default function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {events.map((item) => (
-                  <div key={item.id} className="p-4 border rounded-lg">
-                    <h3 className="font-semibold">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground flex items-center gap-2 mb-2">
-                      <CalendarDays className="w-4 h-4" />
-                      <span>
-                        {new Date(item.date).toLocaleDateString("en-US", {
-                          month: "long",
-                          day: "numeric",
-                          timeZone: 'UTC'
-                        })}
-                      </span>
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {item.description}
-                    </p>
-                  </div>
-                ))}
+                 {loadingEvents ? (
+                  [...Array(3)].map((_, i) => <Skeleton key={i} className="h-20 w-full" />)
+                ) : (
+                  events?.map((item) => (
+                    <div key={item.id} className="p-4 border rounded-lg">
+                      <h3 className="font-semibold">{item.title}</h3>
+                      <p className="text-sm text-muted-foreground flex items-center gap-2 mb-2">
+                        <CalendarDays className="w-4 h-4" />
+                        <span>
+                          {new Date(item.date).toLocaleDateString("en-US", {
+                            month: "long",
+                            day: "numeric",
+                            timeZone: 'UTC'
+                          })}
+                        </span>
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {item.description}
+                      </p>
+                    </div>
+                  ))
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -235,28 +224,32 @@ export default function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {resources.map((resource) => (
-                  <div
-                    key={resource.id}
-                    className="flex items-center justify-between p-3 border rounded-lg"
-                  >
-                    <div className="flex items-center gap-3">
-                      <FileText className="w-5 h-5 text-primary" />
-                      <div>
-                        <h4 className="font-medium">{resource.name}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {resource.description}
-                        </p>
+                {loadingResources ? (
+                  [...Array(3)].map((_, i) => <Skeleton key={i} className="h-20 w-full" />)
+                ) : (
+                  resources?.map((resource) => (
+                    <div
+                      key={resource.id}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <FileText className="w-5 h-5 text-primary" />
+                        <div>
+                          <h4 className="font-medium">{resource.name}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {resource.description}
+                          </p>
+                        </div>
                       </div>
+                      <Button asChild variant="outline" size="sm">
+                        <a href={resource.fileUrl} download>
+                          <Download className="w-4 h-4 mr-2" />
+                          Download
+                        </a>
+                      </Button>
                     </div>
-                    <Button asChild variant="outline" size="sm">
-                      <a href={resource.fileUrl} download>
-                        <Download className="w-4 h-4 mr-2" />
-                        Download
-                      </a>
-                    </Button>
-                  </div>
-                ))}
+                  ))
+                )}
               </CardContent>
             </Card>
           </TabsContent>
