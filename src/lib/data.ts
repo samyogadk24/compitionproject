@@ -3,28 +3,12 @@ import { initializeFirebaseAdmin } from "@/firebase/server";
 import type { OrderByDirection } from "firebase-admin/firestore";
 
 export const getAnnouncements = async (count?: number): Promise<Announcement[]> => {
-  const { firestore } = await initializeFirebaseAdmin();
-  let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = firestore.collection("announcements").orderBy("date", "desc" as OrderByDirection);
-
-  if (count) {
-    query = query.limit(count);
-  }
-
-  const querySnapshot = await query.get();
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Announcement[];
+  return [];
 };
 
 
 export const getEvents = async (count?: number): Promise<Event[]> => {
-  const { firestore } = await initializeFirebaseAdmin();
-  let query: FirebaseFirestore.Query<FirebaseFirestore.DocumentData> = firestore.collection("events").orderBy("date", "desc" as OrderByDirection);
-  
-  if (count) {
-    query = query.limit(count);
-  }
-
-  const querySnapshot = await query.get();
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Event[];
+  return [];
 };
 
 export const getResources = async (): Promise<Resource[]> => {
