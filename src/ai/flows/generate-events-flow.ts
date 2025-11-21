@@ -13,7 +13,7 @@ import { z } from 'genkit';
 const EventSchema = z.object({
   title: z.string().describe('The title of the event.'),
   date: z.string().describe('The date of the event in YYYY-MM-DD format.'),
-  description: z.string().describe('A short, one-sentence description of the event.'),
+  description: z.string().describe('A detailed description of the event, including time, location, and what to expect. Should be 2-3 sentences long.'),
 });
 
 const EventsSchema = z.array(EventSchema);
@@ -36,7 +36,7 @@ The events should be diverse and cover a range of activities relevant to a schoo
 - Community and social events (e.g., Parent-Teacher Meeting, Charity Bake Sale, School Carnival).
 
 Ensure the dates are recent and plausible for the current time of year. Format the dates as YYYY-MM-DD.
-The description should be a single, concise sentence that summarizes the event.
+The description should be detailed, including a time, location, and what to expect. It should be 2-3 sentences long.
 `,
 });
 

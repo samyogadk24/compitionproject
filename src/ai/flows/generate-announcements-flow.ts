@@ -14,6 +14,7 @@ const AnnouncementSchema = z.object({
   title: z.string().describe('The title of the announcement.'),
   date: z.string().describe('The date of the announcement in YYYY-MM-DD format.'),
   shortDescription: z.string().describe('A short, one-sentence summary of the announcement.'),
+  content: z.string().describe('The full content of the announcement, formatted as a few paragraphs of markdown text.'),
 });
 
 const AnnouncementsSchema = z.array(AnnouncementSchema);
@@ -37,6 +38,7 @@ The announcements should be diverse and cover a range of topics relevant to a sc
 
 Ensure the dates are recent and plausible for the current time of year. Format the dates as YYYY-MM-DD.
 The short description should be a single, concise sentence that summarizes the announcement.
+The content should be 2-3 paragraphs long, written in markdown, providing full details about the announcement.
 `,
 });
 
