@@ -155,7 +155,6 @@ function RegisterForm() {
     }
 
     try {
-      // Note: In a real app, you'd want to check if the username is already taken here.
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,

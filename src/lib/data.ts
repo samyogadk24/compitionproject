@@ -3,11 +3,14 @@ import { initializeFirebaseAdmin } from "@/firebase/server";
 import type { OrderByDirection } from "firebase-admin/firestore";
 
 export const getAnnouncements = async (count?: number): Promise<Announcement[]> => {
+  // This function is being cleared to prevent server-side execution errors.
+  // Public pages will use AI-generated content, and authenticated pages will use client-side fetching.
   return [];
 };
 
-
 export const getEvents = async (count?: number): Promise<Event[]> => {
+  // This function is being cleared to prevent server-side execution errors.
+  // Public pages will use AI-generated content, and authenticated pages will use client-side fetching.
   return [];
 };
 
