@@ -19,7 +19,7 @@ const navLinksData = [
     { href: "/announcements", label: "Announcements" },
     { href: "/events", label: "Events" },
     { href: "/contact", label: "Contact" },
-    { href: "/dashboard/students", label: "Directory", auth: true},
+    { href: "/students", label: "Directory", auth: true},
 ];
 
 
@@ -34,10 +34,12 @@ export default function Header() {
   useEffect(() => {
     setHasMounted(true);
   }, []);
-
+  
   const getNavLink = (link: {href: string, label: string, auth?: boolean}) => {
     if (user && link.href !== "/") {
-        if(link.auth) return link;
+        if(link.auth) {
+            return { ...link, href: `/dashboard${link.href}` };
+        }
         return { ...link, href: `/dashboard${link.href}` };
     }
     return link.auth ? null : link;
@@ -74,7 +76,7 @@ export default function Header() {
                 </Link>
               </Button>
           )}
-          <Button onClick={handleLogout} size="sm" variant="destructive">
+           <Button onClick={handleLogout} size="sm" variant="destructive">
             <LogOut />
             Logout
           </Button>
