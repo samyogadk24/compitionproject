@@ -9,6 +9,9 @@ import { cn } from "@/lib/utils";
 import { Menu, LogIn, LogOut, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/firebase";
+import { signOut } from "firebase/auth";
+import { useUser } from "@/firebase/auth/use-user";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -20,7 +23,79 @@ const navLinks = [
 export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
+  const auth = useAuth();
+  const { user, isUserLoading } = useUser();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push("/");
+  };
+
+  const AuthButtons = () => {
+    if (isUserLoading) {
+      return null;
+    }
+
+    if (user) {
+      return (
+        <>
+          <Button asChild variant="outline" size="sm" className="hidden md:flex">
+            <Link href="/dashboard">
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              Dashboard
+            </Link>
+          </Button>
+          <Button onClick={handleLogout} size="sm" className="hidden md:flex">
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
+        </>
+      );
+    }
+
+    return (
+      <Button asChild size="sm" className="hidden md:flex">
+        <Link href="/login">
+          <LogIn className="mr-2 h-4 w-4" />
+          Student Login
+        </Link>
+      </Button>
+    );
+  };
+  
+  const MobileAuthButtons = () => {
+    if (isUserLoading) {
+      return null;
+    }
+
+    if (user) {
+      return (
+        <>
+          <Button asChild size="sm" onClick={() => setIsMobileMenuOpen(false)}>
+            <Link href="/dashboard">
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              Dashboard
+            </Link>
+          </Button>
+          <Button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} size="sm">
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
+        </>
+      );
+    }
+
+    return (
+       <Button asChild size="sm" onClick={() => setIsMobileMenuOpen(false)}>
+          <Link href="/login">
+          <LogIn className="mr-2 h-4 w-4" />
+          Student Login
+          </Link>
+      </Button>
+    );
+  };
+
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-card shadow-sm">
@@ -44,12 +119,7 @@ export default function Header() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-            <Button asChild size="sm" className="hidden md:flex">
-                <Link href="/login">
-                <LogIn className="mr-2 h-4 w-4" />
-                Student Login
-                </Link>
-            </Button>
+            <AuthButtons />
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="md:hidden">
@@ -78,12 +148,7 @@ export default function Header() {
                     </Link>
                   ))}
                 </nav>
-                 <Button asChild size="sm" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Link href="/login">
-                    <LogIn className="mr-2 h-4 w-4" />
-                    Student Login
-                    </Link>
-                </Button>
+                 <MobileAuthButtons />
               </div>
             </SheetContent>
           </Sheet>

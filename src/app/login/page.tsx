@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { SchoolPulseLogo } from "@/components/icons";
+import LoginForm from "./_components/login-form";
 
 export default function LoginPage() {
   return (
@@ -18,11 +19,11 @@ export default function LoginPage() {
             </div>
             <CardTitle className="text-3xl font-bold font-headline">Student Login</CardTitle>
             <CardDescription>
-              Login is currently disabled.
+              Sign in to access your dashboard.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-muted-foreground">Please check back later.</p>
+            <LoginForm />
           </CardContent>
         </Card>
       </div>

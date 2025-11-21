@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { FirebaseClientProvider } from "@/firebase";
 
 const ptSans = PT_Sans({
   subsets: ["latin"],
@@ -35,10 +36,12 @@ export default function RootLayout({
           ptSans.variable
         )}
       >
-        <Header />
-        <main className="flex-1 flex flex-col">{children}</main>
-        <Footer />
-        <Toaster />
+        <FirebaseClientProvider>
+          <Header />
+          <main className="flex-1 flex flex-col">{children}</main>
+          <Footer />
+          <Toaster />
+        </FirebaseClientProvider>
       </body>
     </html>
   );

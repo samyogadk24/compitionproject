@@ -26,17 +26,19 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useUser } from "@/firebase/auth/use-user";
 
 export default function DashboardPage() {
+  const { user: student, loading: userLoading } = useUser();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        setLoading(true);
+        setLoadingData(true);
         const [
           announcementsData,
           eventsData,
@@ -52,7 +54,7 @@ export default function DashboardPage() {
       } catch (error) {
         console.error("Failed to fetch dashboard data", error);
       } finally {
-        setLoading(false);
+        setLoadingData(false);
       }
     }
     fetchData();
@@ -104,7 +106,7 @@ export default function DashboardPage() {
     </div>
   );
 
-  if (loading) {
+  if (userLoading || loadingData) {
     return (
       <div className="flex-1 bg-background">
         <PageSkeleton />
@@ -122,7 +124,7 @@ export default function DashboardPage() {
               Student Dashboard
             </h1>
             <p className="text-muted-foreground">
-              Welcome, Student!
+              Welcome, {student?.firstName || 'Student'}!
             </p>
           </div>
         </div>

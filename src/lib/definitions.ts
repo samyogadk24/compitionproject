@@ -20,9 +20,8 @@ export type Resource = {
 };
 
 export type Student = {
-  uid: string;
+  id: string;
+  firstName: string;
+  lastName: string;
   email: string | null;
-  displayName: string | null;
-  photoURL: string | null;
-  createdAt: string;
 };
