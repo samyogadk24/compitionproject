@@ -29,13 +29,14 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
+    if (!auth) return;
     await signOut(auth);
     router.push("/");
   };
 
   const AuthButtons = () => {
     if (isUserLoading) {
-      return null;
+      return <div className="h-9 w-24 rounded-md bg-muted animate-pulse hidden md:block" />;
     }
 
     if (user) {
@@ -43,12 +44,12 @@ export default function Header() {
         <>
           <Button asChild variant="outline" size="sm" className="hidden md:flex">
             <Link href="/dashboard">
-              <LayoutDashboard className="mr-2 h-4 w-4" />
+              <LayoutDashboard />
               Dashboard
             </Link>
           </Button>
           <Button onClick={handleLogout} size="sm" className="hidden md:flex">
-            <LogOut className="mr-2 h-4 w-4" />
+            <LogOut />
             Logout
           </Button>
         </>
@@ -58,7 +59,7 @@ export default function Header() {
     return (
       <Button asChild size="sm" className="hidden md:flex">
         <Link href="/login">
-          <LogIn className="mr-2 h-4 w-4" />
+          <LogIn />
           Student Login
         </Link>
       </Button>
@@ -66,32 +67,39 @@ export default function Header() {
   };
   
   const MobileAuthButtons = () => {
+    const closeMenu = () => setIsMobileMenuOpen(false);
+
     if (isUserLoading) {
-      return null;
+      return (
+        <div className="flex flex-col gap-2">
+           <div className="h-10 w-full rounded-md bg-muted animate-pulse" />
+           <div className="h-10 w-full rounded-md bg-muted animate-pulse" />
+        </div>
+      );
     }
 
     if (user) {
       return (
-        <>
-          <Button asChild size="sm" onClick={() => setIsMobileMenuOpen(false)}>
+        <div className="flex flex-col gap-2 mt-auto">
+          <Button asChild variant="outline" size="sm" onClick={closeMenu}>
             <Link href="/dashboard">
-              <LayoutDashboard className="mr-2 h-4 w-4" />
+              <LayoutDashboard />
               Dashboard
             </Link>
           </Button>
-          <Button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} size="sm">
-            <LogOut className="mr-2 h-4 w-4" />
+          <Button onClick={() => { handleLogout(); closeMenu(); }} size="sm" variant="destructive">
+            <LogOut />
             Logout
           </Button>
-        </>
+        </div>
       );
     }
 
     return (
-       <Button asChild size="sm" onClick={() => setIsMobileMenuOpen(false)}>
+       <Button asChild size="sm" onClick={closeMenu} className="mt-auto">
           <Link href="/login">
-          <LogIn className="mr-2 h-4 w-4" />
-          Student Login
+            <LogIn />
+            Student Login
           </Link>
       </Button>
     );
@@ -105,14 +113,14 @@ export default function Header() {
           <SchoolPulseLogo className="h-7 w-7 text-primary" />
           <span className="font-headline">SchoolPulse</span>
         </Link>
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-2">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={cn(
-                "text-sm font-medium transition-colors hover:text-primary",
-                pathname === link.href ? "text-primary" : "text-muted-foreground"
+                "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                pathname === link.href ? "bg-accent text-accent-foreground" : "text-muted-foreground"
               )}
             >
               {link.label}
@@ -128,29 +136,28 @@ export default function Header() {
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right">
-              <div className="flex flex-col gap-6 p-6">
-                <Link href="/" className="flex items-center gap-2 font-bold text-lg" onClick={() => setIsMobileMenuOpen(false)}>
+            <SheetContent side="right" className="flex flex-col">
+               <Link href="/" className="flex items-center gap-2 font-bold text-lg mb-4" onClick={() => setIsMobileMenuOpen(false)}>
                   <SchoolPulseLogo className="h-7 w-7 text-primary" />
                   <span className="font-headline">SchoolPulse</span>
                 </Link>
-                <nav className="flex flex-col gap-4">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className={cn(
-                        "text-lg font-medium transition-colors hover:text-primary",
-                        pathname === link.href ? "text-primary" : "text-muted-foreground"
-                      )}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                </nav>
-                 <MobileAuthButtons />
-              </div>
+              <nav className="flex flex-col gap-2">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      "rounded-md px-3 py-2 text-base font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                      pathname === link.href ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                    )}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+              <div className="flex-1" />
+              <MobileAuthButtons />
             </SheetContent>
           </Sheet>
         </div>
