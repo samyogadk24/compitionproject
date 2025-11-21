@@ -41,7 +41,7 @@ export default function Header() {
 
   const AuthButtons = () => {
     if (!hasMounted) {
-      // Render nothing on the server and during initial client render
+      // Render nothing on the server. On the client, this will be replaced after mount.
       return null;
     }
 
@@ -80,7 +80,7 @@ export default function Header() {
     const closeMenu = () => setIsMobileMenuOpen(false);
 
     if (!hasMounted) {
-       // Render nothing on the server and during initial client render
+       // Render nothing on the server.
       return null;
     }
 
