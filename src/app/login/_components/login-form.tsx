@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  signInAnonymously,
+  signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
@@ -32,17 +32,26 @@ function SignInForm() {
     }
     setIsSigningIn(true);
     setError(null);
+    
+    const formData = new FormData(event.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
     try {
-      // For development: Sign in anonymously to bypass password check
-      await signInAnonymously(auth);
+      await signInWithEmailAndPassword(auth, email, password);
       router.push("/dashboard");
     } catch (error: any) {
-      console.error("Anonymous Sign-In Error:", error);
-      setError(error.message);
+      console.error("Email/Password Sign-In Error:", error);
+      let errorMessage = "An unexpected error occurred.";
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        errorMessage = "Invalid email or password. Please try again or register a new account."
+      } else {
+        errorMessage = error.message;
+      }
+      setError(errorMessage);
       toast({
         title: "Login Failed",
-        description: "Could not sign in anonymously.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -60,9 +69,9 @@ function SignInForm() {
         </Alert>
       )}
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email-signin">Email</Label>
         <Input
-          id="email"
+          id="email-signin"
           name="email"
           type="email"
           placeholder="student@example.com"
@@ -70,9 +79,9 @@ function SignInForm() {
         />
       </div>
       <div className="space-y-2 relative">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password-signin">Password</Label>
         <Input
-          id="password"
+          id="password-signin"
           name="password"
           type={showPassword ? "text" : "password"}
           required
@@ -84,7 +93,7 @@ function SignInForm() {
           className="absolute bottom-1 right-1 h-7 w-7"
           onClick={() => setShowPassword(!showPassword)}
         >
-          {showPassword ? <EyeOff /> : <Eye />}
+          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           <span className="sr-only">
             {showPassword ? "Hide password" : "Show password"}
           </span>
@@ -179,9 +188,9 @@ function RegisterForm() {
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email-register">Email</Label>
         <Input
-          id="email"
+          id="email-register"
           name="email"
           type="email"
           placeholder="student@example.com"
@@ -189,9 +198,9 @@ function RegisterForm() {
         />
       </div>
       <div className="space-y-2 relative">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password-register">Password</Label>
         <Input
-          id="password"
+          id="password-register"
           name="password"
           type={showPassword ? "text" : "password"}
           required
@@ -203,7 +212,7 @@ function RegisterForm() {
           className="absolute bottom-1 right-1 h-7 w-7"
           onClick={() => setShowPassword(!showPassword)}
         >
-          {showPassword ? <EyeOff /> : <Eye />}
+          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           <span className="sr-only">
             {showPassword ? "Hide password" : "Show password"}
           </span>
