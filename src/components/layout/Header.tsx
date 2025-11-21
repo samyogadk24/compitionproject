@@ -15,9 +15,7 @@ import { useUser } from "@/firebase/auth/use-user";
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/announcements", label: "Announcements" },
-  { href: "/events", label: "Events" },
-  { href: "/contact", label: "Contact" },
+  { href: "/students", label: "Directory" },
 ];
 
 export default function Header() {

@@ -15,22 +15,22 @@ import { generateEvents } from "@/ai/flows/generate-events-flow";
 
 const featureCards = [
   {
-    title: "Full Announcements",
-    description: "View all school news.",
-    href: "/announcements",
-    icon: <Megaphone className="w-8 h-8 text-primary" />,
-  },
-  {
-    title: "All Events",
-    description: "See all upcoming events.",
-    href: "/events",
-    icon: <CalendarDays className="w-8 h-8 text-primary" />,
-  },
-  {
-    title: "Student Resources",
+    title: "Student Portal",
     description: "Access your dashboard.",
     href: "/dashboard",
     icon: <Library className="w-8 h-8 text-primary" />,
+  },
+  {
+    title: "School Directory",
+    description: "Connect with others.",
+    href: "/students",
+    icon: <Megaphone className="w-8 h-8 text-primary" />,
+  },
+  {
+    title: "Teacher Zone",
+    description: "Manage school content.",
+    href: "/teacher/login",
+    icon: <CalendarDays className="w-8 h-8 text-primary" />,
   },
 ];
 
@@ -63,9 +63,6 @@ export default async function Home() {
             <Button asChild size="lg">
               <Link href="/login">Get Started</Link>
             </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link href="/contact">Contact Us</Link>
-            </Button>
           </div>
         </div>
       </section>
@@ -95,7 +92,7 @@ export default async function Home() {
           </div>
            <div className="text-center mt-8">
               <Button asChild variant="outline">
-                  <Link href="/announcements">View All Announcements <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                  <Link href="/dashboard/announcements">View All Announcements <ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
           </div>
         </section>
@@ -124,7 +121,7 @@ export default async function Home() {
           </div>
            <div className="text-center mt-8">
               <Button asChild variant="outline">
-                  <Link href="/events">View All Events <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                  <Link href="/dashboard/events">View All Events <ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
           </div>
         </section>
