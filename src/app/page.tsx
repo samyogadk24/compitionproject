@@ -54,11 +54,6 @@ export default function Home() {
           <p className="mt-4 text-xl text-muted-foreground">
             Stay Connected. Stay Updated.
           </p>
-          <Button asChild className="mt-8">
-            <Link href="/login">
-              Student Login <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
-          </Button>
         </div>
       </section>
 
