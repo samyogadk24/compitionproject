@@ -1,7 +1,261 @@
 {
-  "entities": {},
-  "auth": {
-    "providers": []
+  "entities": {
+    "Announcement": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Announcement",
+      "type": "object",
+      "description": "Represents a school announcement.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the announcement."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the announcement."
+        },
+        "date": {
+          "type": "string",
+          "description": "Date of the announcement.",
+          "format": "date-time"
+        },
+        "shortDescription": {
+          "type": "string",
+          "description": "Short description or excerpt of the announcement."
+        },
+        "content": {
+          "type": "string",
+          "description": "Full content of the announcement."
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "date",
+        "shortDescription",
+        "content"
+      ]
+    },
+    "Event": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Event",
+      "type": "object",
+      "description": "Represents a school event.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the event."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the event."
+        },
+        "date": {
+          "type": "string",
+          "description": "Date and time of the event.",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the event."
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "date",
+        "description"
+      ]
+    },
+    "ContactMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ContactMessage",
+      "type": "object",
+      "description": "Represents a contact message sent through the contact form.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the contact message."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the person sending the message."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the person sending the message.",
+          "format": "email"
+        },
+        "message": {
+          "type": "string",
+          "description": "Content of the contact message."
+        },
+        "sentDate": {
+          "type": "string",
+          "description": "Date the message was sent.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "message",
+        "sentDate"
+      ]
+    },
+    "Student": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Student",
+      "type": "object",
+      "description": "Represents a student profile, linked to Firebase Authentication.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the student, matching Firebase Auth UID."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "First name of the student."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Last name of the student."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the student, from Firebase Authentication.",
+          "format": "email"
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "lastName",
+        "email"
+      ]
+    },
+    "Resource": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Resource",
+      "type": "object",
+      "description": "Represents a downloadable resource.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the resource."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the resource."
+        },
+        "fileUrl": {
+          "type": "string",
+          "description": "URL of the file stored in Firebase Storage.",
+          "format": "uri"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the resource."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "fileUrl",
+        "description"
+      ]
+    }
   },
-  "firestore": {}
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/announcements/{announcementId}",
+        "definition": {
+          "entityName": "Announcement",
+          "schema": {
+            "$ref": "#/backend/entities/Announcement"
+          },
+          "description": "Stores school announcements. Includes denormalized fields if access control beyond admin is needed (e.g., 'visibleToStudents' boolean).",
+          "params": [
+            {
+              "name": "announcementId",
+              "description": "Unique identifier for the announcement."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/events/{eventId}",
+        "definition": {
+          "entityName": "Event",
+          "schema": {
+            "$ref": "#/backend/entities/Event"
+          },
+          "description": "Stores school events. Includes denormalized fields if access control beyond admin is needed (e.g., 'visibleToStudents' boolean).",
+          "params": [
+            {
+              "name": "eventId",
+              "description": "Unique identifier for the event."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/contactMessages/{contactMessageId}",
+        "definition": {
+          "entityName": "ContactMessage",
+          "schema": {
+            "$ref": "#/backend/entities/ContactMessage"
+          },
+          "description": "Stores contact messages sent through the contact form.",
+          "params": [
+            {
+              "name": "contactMessageId",
+              "description": "Unique identifier for the contact message."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/students/{studentId}",
+        "definition": {
+          "entityName": "Student",
+          "schema": {
+            "$ref": "#/backend/entities/Student"
+          },
+          "description": "Stores student profiles, linked to Firebase Authentication. 'studentId' MUST match the Firebase Auth UID.",
+          "params": [
+            {
+              "name": "studentId",
+              "description": "Unique identifier for the student, matching Firebase Auth UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/resources/{resourceId}",
+        "definition": {
+          "entityName": "Resource",
+          "schema": {
+            "$ref": "#/backend/entities/Resource"
+          },
+          "description": "Stores downloadable resources.",
+          "params": [
+            {
+              "name": "resourceId",
+              "description": "Unique identifier for the resource."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to support SchoolPulse's features while adhering to the principles of Authorization Independence and Structural Segregation. User data is stored in `/students/{studentId}` using Path-Based ownership, which aligns with the principle of keeping private data easily accessible. Announcements, Events, Contact Messages and Resources are stored in root collections `/announcements`, `/events`, `/contactMessages`, and `/resources` respectively. Segregating the announcements and events into a top-level collection simplifies querying and management. Student data is kept separate, accessible only by the student themselves using the unique user ID provided by Firebase Authentication, ensuring privacy and security. The 'studentId' parameter is used to create an association between user accounts managed by Firebase Authentication and the corresponding documents in the `students` collection. This ensures that student login is connected with each student account through the respective Firebase Auth UIDs. The structure does not rely on any hierarchical authorization dependencies, ensuring atomic operations and ease of debugging."
+  }
 }

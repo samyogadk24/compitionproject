@@ -1,0 +1,152 @@
+/**
+ * Core Philosophy: This ruleset enforces a strict security model based on user ownership and role segregation.
+ * Student data is private and can only be accessed by the owning student. Public-facing data, such as
+ * announcements, events, and resources, is readable by anyone but can only be managed by administrators
+ * (currently disabled for client writes, requiring Admin SDK usage). A special 'dropbox' pattern is used for
+ * contact messages, allowing anyone to submit them but preventing anyone from reading them.
+ *
+ * Data Structure: The data is organized into several top-level collections for clear separation of concerns.
+ * - /students/{studentId}: Stores private user profiles, where the document ID matches the user's authentication UID.
+ * - /announcements/{announcementId}: Publicly readable school announcements.
+ * - /events/{eventId}: Publicly readable school events.
+ * - /resources/{resourceId}: Publicly readable downloadable resources.
+ * - /contactMessages/{contactMessageId}: A write-only collection for public form submissions.
+ *
+ * Key Security Decisions:
+ * - Student Privacy: The '/students' collection is locked down. Users can only read and write their own
+ *   document. Listing all students is explicitly forbidden to prevent user enumeration.
+ * - Admin-Managed Content: All writes to public collections like '/announcements', '/events', and '/resources'
+ *   are denied by default from the client. This is a secure posture that assumes content is managed via a trusted
+ *   backend service using the Firebase Admin SDK. To enable client-side writes, these collections would need
+ *   a denormalized 'ownerId' field on each document.
+ * - Dropbox for Contact Messages: The '/contactMessages' collection allows anyone to create documents,
+ *   but no one can read, update, or delete them via the client. This securely collects data without exposing it.
+ *
+ * Denormalization for Authorization: The primary use of denormalization is within the student profile itself.
+ * The `Student` document contains an `id` field which must match the document's ID (`studentId`) and the
+ * authenticated user's UID. This enforces a strong, unchangeable link between the user's identity and their data.
+ *
+ * Structural Segregation: The ruleset leverages separate collections for different data types, which is
+ * more secure and performant than mixing public and private data in one collection with a status flag.
+ * For example, student profiles are in `/students`, completely separate from public `/announcements`.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ----------------------------------------------------------------------
+    // Helper Functions
+    // ----------------------------------------------------------------------
+
+    /**
+     * Checks if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the currently authenticated user's UID matches the provided userId.
+     * This is the foundation of the user-ownership model.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // ----------------------------------------------------------------------
+    // Student Profile Rules (/students)
+    // ----------------------------------------------------------------------
+
+    /**
+     * @description Controls access to a student's private profile document.
+     * @path /students/{studentId}
+     * @allow A signed-in student (auth.uid: 'user123') creating their own profile (document id: 'user123'). (create)
+     * @deny A student ('user123') trying to read another student's profile ('user456'). (get)
+     * @principle Restricts access to a user's own data tree, enforcing privacy and ownership.
+     */
+    match /students/{studentId} {
+      allow get: if isOwner(studentId);
+      allow list: if false; // Disallow listing students to prevent user enumeration.
+      allow create: if isOwner(studentId) && request.resource.data.id == studentId;
+      allow update: if isOwner(studentId) && resource != null && request.resource.data.id == resource.data.id;
+      allow delete: if isOwner(studentId) && resource != null;
+    }
+
+    // ----------------------------------------------------------------------
+    // Announcements Rules (/announcements)
+    // ----------------------------------------------------------------------
+
+    /**
+     * @description Manages access to school announcements. Publicly readable by all.
+     * @path /announcements/{announcementId}
+     * @allow Any user, signed-in or not, reading an announcement. (get, list)
+     * @deny Any user attempting to create or modify an announcement from the client. (create, update, delete)
+     * @principle Implements a public read-only pattern. Writes are disabled for clients,
+     *            requiring a secure backend (Admin SDK) for content management.
+     */
+    match /announcements/{announcementId} {
+      allow get: if true;
+      allow list: if true;
+      // CRITICAL: Cannot implement owner-only writes. The 'Announcement' entity is missing an 'ownerId' or 'authorId' field.
+      allow create, update, delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+    }
+
+    // ----------------------------------------------------------------------
+    // Events Rules (/events)
+    // ----------------------------------------------------------------------
+
+    /**
+     * @description Manages access to school events. Publicly readable by all.
+     * @path /events/{eventId}
+     * @allow Any user, signed-in or not, reading an event. (get, list)
+     * @deny Any user attempting to create or modify an event from the client. (create, update, delete)
+     * @principle Implements a public read-only pattern. Writes are disabled for clients,
+     *            requiring a secure backend (Admin SDK) for content management.
+     */
+    match /events/{eventId} {
+      allow get: if true;
+      allow list: if true;
+      // CRITICAL: Cannot implement owner-only writes. The 'Event' entity is missing an 'ownerId' or 'authorId' field.
+      allow create, update, delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+    }
+
+    // ----------------------------------------------------------------------
+    // Resources Rules (/resources)
+    // ----------------------------------------------------------------------
+
+    /**
+     * @description Manages access to downloadable resources. Publicly readable by all.
+     * @path /resources/{resourceId}
+     * @allow Any user, signed-in or not, reading a resource document. (get, list)
+     * @deny Any user attempting to create or modify a resource from the client. (create, update, delete)
+     * @principle Implements a public read-only pattern. Writes are disabled for clients,
+     *            requiring a secure backend (Admin SDK) for content management.
+     */
+    match /resources/{resourceId} {
+      allow get: if true;
+      allow list: if true;
+      // CRITICAL: Cannot implement owner-only writes. The 'Resource' entity is missing an 'ownerId' or 'authorId' field.
+      allow create, update, delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+    }
+
+    // ----------------------------------------------------------------------
+    // Contact Messages Rules (/contactMessages)
+    // ----------------------------------------------------------------------
+
+    /**
+     * @description Provides a secure 'dropbox' for contact form submissions.
+     * @path /contactMessages/{contactMessageId}
+     * @allow Any user, anonymous or signed-in, submitting a new contact message. (create)
+     * @deny Any user attempting to read, update, or delete any message. (get, list, update, delete)
+     * @principle Enforces a write-only 'dropbox' pattern. Data can be submitted but not viewed
+     *            or modified from the client, protecting user privacy.
+     */
+    match /contactMessages/{contactMessageId} {
+      allow get: if false;
+      allow list: if false;
+      allow create: if true; // Anyone can submit a message
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}
