@@ -1,15 +1,12 @@
 "use client";
 
 import {
-  GoogleAuthProvider,
-  signInWithPopup,
-  User as FirebaseUser,
+  signInAnonymously,
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
 } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { useAuth, useFirestore, setDocumentNonBlocking } from "@/firebase";
+import { useAuth, useFirestore } from "@/firebase";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -36,19 +33,16 @@ function SignInForm() {
     setIsSigningIn(true);
     setError(null);
 
-    const formData = new FormData(event.currentTarget);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      // For development: Sign in anonymously to bypass password check
+      await signInAnonymously(auth);
       router.push("/dashboard");
     } catch (error: any) {
-      console.error("Email/Password Sign-In Error:", error);
+      console.error("Anonymous Sign-In Error:", error);
       setError(error.message);
       toast({
         title: "Login Failed",
-        description: "Invalid email or password.",
+        description: "Could not sign in anonymously.",
         variant: "destructive",
       });
     } finally {
