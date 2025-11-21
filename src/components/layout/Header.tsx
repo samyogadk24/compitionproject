@@ -40,7 +40,12 @@ export default function Header() {
   };
 
   const AuthButtons = () => {
-    if (!hasMounted || isUserLoading) {
+    if (!hasMounted) {
+      // Render nothing on the server and during initial client render
+      return null;
+    }
+
+    if (isUserLoading) {
       return <div className="h-9 w-24 rounded-md bg-muted animate-pulse hidden md:block" />;
     }
 
@@ -74,7 +79,12 @@ export default function Header() {
   const MobileAuthButtons = () => {
     const closeMenu = () => setIsMobileMenuOpen(false);
 
-    if (!hasMounted || isUserLoading) {
+    if (!hasMounted) {
+       // Render nothing on the server and during initial client render
+      return null;
+    }
+
+    if (isUserLoading) {
       return (
         <div className="flex flex-col gap-2">
            <div className="h-10 w-full rounded-md bg-muted animate-pulse" />
