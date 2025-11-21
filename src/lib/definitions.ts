@@ -2,7 +2,7 @@ export type Announcement = {
   id: string;
   title: string;
   date: string;
-  description: string;
+  shortDescription: string;
 };
 
 export type Event = {
@@ -14,7 +14,7 @@ export type Event = {
 
 export type Resource = {
   id: string;
-  title: string;
+  name: string;
   description: string;
   fileUrl: string;
 };

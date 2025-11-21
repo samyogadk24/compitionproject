@@ -4,11 +4,6 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
 // Schemas
-const AnnouncementSchema = z.object({
-  title: z.string().min(1, "Title is required."),
-  description: z.string().min(1, "Description is required."),
-});
-
 const ContactSchema = z.object({
   name: z.string().min(1, "Name is required."),
   email: z.string().email("Please enter a valid email."),
@@ -22,27 +17,6 @@ export type State = {
   message?: string | null;
 };
 
-
-export async function addAnnouncement(prevState: State, formData: FormData): Promise<State> {
-  const validatedFields = AnnouncementSchema.safeParse(
-    Object.fromEntries(formData.entries())
-  );
-
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: "Invalid fields. Failed to add announcement.",
-    };
-  }
-
-  // In a real app, you'd save this to Firestore
-  console.log("Adding announcement:", validatedFields.data);
-
-  revalidatePath("/announcements");
-  revalidatePath("/dashboard");
-
-  return { message: "Announcement added successfully!" };
-}
 
 export async function submitContactForm(prevState: State, formData: FormData): Promise<State> {
   const validatedFields = ContactSchema.safeParse(

@@ -1,4 +1,3 @@
-import { getAnnouncements } from "@/lib/data";
 import {
   Card,
   CardContent,
@@ -6,17 +5,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { CalendarDays, Megaphone } from "lucide-react";
-import AddAnnouncementForm from "./_components/add-announcement-form";
+import { generateAnnouncements } from "@/ai/flows/generate-announcements-flow";
 
 export default async function AnnouncementsPage() {
-  const announcements = await getAnnouncements();
+  const announcements = await generateAnnouncements();
 
   return (
     <div className="flex-1 bg-background">
@@ -31,47 +24,21 @@ export default async function AnnouncementsPage() {
           </div>
         </div>
 
-        <div className="grid gap-12 md:grid-cols-3">
-          <div className="md:col-span-2">
-            <div className="space-y-6">
-              {announcements.map((announcement) => (
-                <Card key={announcement.id} className="transition-shadow hover:shadow-md">
-                  <CardHeader>
-                    <CardTitle className="font-headline">{announcement.title}</CardTitle>
-                    <CardDescription className="flex items-center gap-2 text-sm">
-                      <CalendarDays className="w-4 h-4" />
-                      <span>{new Date(announcement.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p>{announcement.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-          <div className="md:col-span-1">
-            <Card className="sticky top-24">
+        <div className="space-y-6">
+          {announcements.map((announcement, index) => (
+            <Card key={index} className="transition-shadow hover:shadow-md">
               <CardHeader>
-                <CardTitle className="font-headline">Admin</CardTitle>
-                <CardDescription>
-                  Add a new announcement to the list.
+                <CardTitle className="font-headline">{announcement.title}</CardTitle>
+                <CardDescription className="flex items-center gap-2 text-sm pt-1">
+                  <CalendarDays className="w-4 h-4" />
+                  <span>{new Date(announcement.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}</span>
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Accordion type="single" collapsible>
-                  <AccordionItem value="add-announcement">
-                    <AccordionTrigger className="text-base">
-                      Add New Announcement
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <AddAnnouncementForm />
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
+                <p>{announcement.shortDescription}</p>
               </CardContent>
             </Card>
-          </div>
+          ))}
         </div>
       </div>
     </div>

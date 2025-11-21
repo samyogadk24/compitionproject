@@ -7,9 +7,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CalendarDays, PartyPopper } from "lucide-react";
+import { initializeFirebase } from "@/firebase";
 
 export default async function EventsPage() {
-  const events = await getEvents();
+  const { firestore } = initializeFirebase();
+  const events = await getEvents(firestore);
 
   return (
     <div className="flex-1 bg-background">
@@ -29,9 +31,9 @@ export default async function EventsPage() {
             <Card key={event.id} className="flex flex-col transition-shadow hover:shadow-md">
               <CardHeader>
                 <CardTitle className="font-headline">{event.title}</CardTitle>
-                <CardDescription className="flex items-center gap-2 text-sm">
+                <CardDescription className="flex items-center gap-2 text-sm pt-1">
                   <CalendarDays className="w-4 h-4" />
-                  <span>{new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                  <span>{new Date(event.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}</span>
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-1">

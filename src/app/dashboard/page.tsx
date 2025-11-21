@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getAnnouncements, getEvents, getResources } from "@/lib/data";
-import type { Announcement, Event, Resource } from "@/lib/definitions";
+import { useEffect, useMemo, useState } from "react";
+import type { Student } from "@/lib/definitions";
 import {
   Card,
   CardContent,
@@ -27,9 +26,35 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUser } from "@/firebase/auth/use-user";
+import { collection, getDocs, limit, orderBy, query, Query } from "firebase/firestore";
+import { useFirestore } from "@/firebase";
+
+// Redefining types here to avoid import issues in this file.
+type Announcement = {
+  id: string;
+  title: string;
+  date: string;
+  shortDescription: string;
+};
+
+type Event = {
+  id: string;
+  title: string;
+  date: string;
+  description: string;
+};
+
+type Resource = {
+  id: string;
+  name: string;
+  description: string;
+  fileUrl: string;
+};
 
 export default function DashboardPage() {
   const { user: student, loading: userLoading } = useUser();
+  const firestore = useFirestore();
+
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
@@ -37,20 +62,32 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function fetchData() {
+      if (!firestore) return;
       try {
         setLoadingData(true);
+
+        const announcementsQuery = query(collection(firestore, 'announcements'), orderBy('date', 'desc'), limit(3));
+        const eventsQuery = query(collection(firestore, 'events'), orderBy('date', 'desc'), limit(3));
+        const resourcesQuery = query(collection(firestore, 'resources'), limit(3));
+        
         const [
-          announcementsData,
-          eventsData,
-          resourcesData,
+          announcementsSnapshot,
+          eventsSnapshot,
+          resourcesSnapshot,
         ] = await Promise.all([
-          getAnnouncements(),
-          getEvents(),
-          getResources(),
+          getDocs(announcementsQuery),
+          getDocs(eventsQuery),
+          getDocs(resourcesQuery),
         ]);
+
+        const announcementsData = announcementsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Announcement[];
+        const eventsData = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Event[];
+        const resourcesData = resourcesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Resource[];
+
         setAnnouncements(announcementsData);
         setEvents(eventsData);
         setResources(resourcesData);
+
       } catch (error) {
         console.error("Failed to fetch dashboard data", error);
       } finally {
@@ -58,7 +95,7 @@ export default function DashboardPage() {
       }
     }
     fetchData();
-  }, []);
+  }, [firestore]);
 
   const PageSkeleton = () => (
     <div className="container mx-auto py-12 px-4 md:px-6">
@@ -154,11 +191,11 @@ export default function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {announcements.slice(0, 3).map((item) => (
+                {announcements.map((item) => (
                   <div key={item.id} className="p-4 border rounded-lg">
                     <h3 className="font-semibold">{item.title}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {item.description}
+                      {item.shortDescription}
                     </p>
                   </div>
                 ))}
@@ -175,7 +212,7 @@ export default function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {events.slice(0, 3).map((item) => (
+                {events.map((item) => (
                   <div key={item.id} className="p-4 border rounded-lg">
                     <h3 className="font-semibold">{item.title}</h3>
                     <p className="text-sm text-muted-foreground flex items-center gap-2 mb-2">
@@ -184,6 +221,7 @@ export default function DashboardPage() {
                         {new Date(item.date).toLocaleDateString("en-US", {
                           month: "long",
                           day: "numeric",
+                          timeZone: 'UTC'
                         })}
                       </span>
                     </p>
@@ -213,7 +251,7 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-3">
                       <FileText className="w-5 h-5 text-primary" />
                       <div>
-                        <h4 className="font-medium">{resource.title}</h4>
+                        <h4 className="font-medium">{resource.name}</h4>
                         <p className="text-sm text-muted-foreground">
                           {resource.description}
                         </p>
