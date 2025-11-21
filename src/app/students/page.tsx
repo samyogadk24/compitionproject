@@ -4,19 +4,21 @@ import { useMemoFirebase } from '@/firebase/provider';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { useFirestore } from '@/firebase';
 import { collection, query, Query } from 'firebase/firestore';
-import type { Student } from '@/lib/definitions';
+import type { UserProfile } from '@/lib/definitions';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Users } from 'lucide-react';
+import { Users, User, Shield } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
-function StudentCard({ student }: { student: Student }) {
-  const initials = `${student.firstName?.[0] ?? ''}${student.lastName?.[0] ?? ''}`;
+function UserProfileCard({ user }: { user: UserProfile }) {
+  const initials = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`;
   return (
     <Card>
       <CardHeader>
@@ -26,13 +28,17 @@ function StudentCard({ student }: { student: Student }) {
           </Avatar>
           <div>
             <CardTitle className="text-lg font-bold font-headline">
-              {student.firstName} {student.lastName}
+              {user.firstName} {user.lastName}
             </CardTitle>
+            <CardDescription className="flex items-center gap-2">
+                {user.role === 'teacher' ? <Shield className="w-4 h-4 text-primary" /> : <User className="w-4 h-4 text-muted-foreground" />}
+                <span className="capitalize">{user.role}</span>
+            </CardDescription>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-muted-foreground">{student.email}</p>
+        <p className="text-sm text-muted-foreground">{user.email}</p>
       </CardContent>
     </Card>
   );
@@ -48,6 +54,7 @@ function PageSkeleton() {
               <Skeleton className="h-10 w-10 rounded-full" />
               <div className="space-y-2">
                 <Skeleton className="h-4 w-[150px]" />
+                <Skeleton className="h-3 w-[80px]" />
               </div>
             </div>
           </CardHeader>
@@ -60,15 +67,14 @@ function PageSkeleton() {
   );
 }
 
-export default function StudentsPage() {
+export default function UsersPage() {
   const firestore = useFirestore();
-  const studentsQuery = useMemoFirebase(() => {
+  const usersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    // The explicit type cast is required here.
-    return query(collection(firestore, 'students')) as Query<Student>;
+    return query(collection(firestore, 'users')) as Query<UserProfile>;
   }, [firestore]);
 
-  const { data: students, isLoading } = useCollection<Student>(studentsQuery);
+  const { data: users, isLoading } = useCollection<UserProfile>(usersQuery);
 
   return (
     <div className="flex-1 bg-background">
@@ -76,9 +82,9 @@ export default function StudentsPage() {
         <div className="flex items-center gap-4 mb-8">
           <Users className="w-10 h-10 text-primary" />
           <div>
-            <h1 className="text-4xl font-bold font-headline">Student Directory</h1>
+            <h1 className="text-4xl font-bold font-headline">User Directory</h1>
             <p className="text-muted-foreground">
-              Find and connect with other students.
+              Find and connect with others in the school community.
             </p>
           </div>
         </div>
@@ -87,8 +93,8 @@ export default function StudentsPage() {
           <PageSkeleton />
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {students?.map((student) => (
-              <StudentCard key={student.id} student={student} />
+            {users?.map((user) => (
+              <UserProfileCard key={user.id} user={user} />
             ))}
           </div>
         )}

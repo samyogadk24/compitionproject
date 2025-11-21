@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import type { Student } from "@/lib/definitions";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -22,37 +21,19 @@ import {
   Library,
   Megaphone,
   User,
+  Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUser } from "@/firebase/auth/use-user";
-import { collection, getDocs, limit, orderBy, query, Query } from "firebase/firestore";
+import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 import { useFirestore } from "@/firebase";
+import Link from "next/link";
+import type { Announcement, Event, Resource } from "@/lib/definitions";
 
-// Redefining types here to avoid import issues in this file.
-type Announcement = {
-  id: string;
-  title: string;
-  date: string;
-  shortDescription: string;
-};
-
-type Event = {
-  id: string;
-  title: string;
-  date: string;
-  description: string;
-};
-
-type Resource = {
-  id: string;
-  name: string;
-  description: string;
-  fileUrl: string;
-};
 
 export default function DashboardPage() {
-  const { user: student, loading: userLoading } = useUser();
+  const { user, loading: userLoading } = useUser();
   const firestore = useFirestore();
 
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -154,17 +135,28 @@ export default function DashboardPage() {
   return (
     <div className="flex-1 bg-background">
       <div className="container mx-auto py-12 px-4 md:px-6">
-        <div className="flex items-center gap-4 mb-8">
-          <User className="w-10 h-10 text-primary" />
-          <div>
-            <h1 className="text-4xl font-bold font-headline">
-              Student Dashboard
-            </h1>
-            <p className="text-muted-foreground">
-              Welcome, {student?.firstName || 'Student'}!
-            </p>
-          </div>
+        <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+            <User className="w-10 h-10 text-primary" />
+            <div>
+                <h1 className="text-4xl font-bold font-headline">
+                {user?.role === 'teacher' ? 'Teacher' : 'Student'} Dashboard
+                </h1>
+                <p className="text-muted-foreground">
+                Welcome, {user?.firstName || 'User'}!
+                </p>
+            </div>
+            </div>
+            {user?.role === 'teacher' && (
+                <Button asChild>
+                    <Link href="/teacher/dashboard">
+                        <Shield className="w-4 h-4 mr-2" />
+                        Go to Teacher Zone
+                    </Link>
+                </Button>
+            )}
         </div>
+
 
         <Tabs defaultValue="announcements" className="w-full">
           <TabsList className="grid w-full grid-cols-3">

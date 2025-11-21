@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SchoolPulseLogo } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { Menu, LogIn, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, LogIn, LogOut, LayoutDashboard, Shield } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/firebase";
@@ -17,7 +17,7 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/announcements", label: "Announcements" },
   { href: "/events", label: "Events" },
-  { href: "/students", label: "Students" },
+  { href: "/students", label: "Directory" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -51,6 +51,14 @@ export default function Header() {
     if (user) {
       return (
         <>
+          {user.role === 'teacher' && (
+             <Button asChild variant="outline" size="sm" className="hidden md:flex">
+                <Link href="/teacher/dashboard">
+                  <Shield />
+                  Teacher Zone
+                </Link>
+              </Button>
+          )}
           <Button asChild variant="outline" size="sm" className="hidden md:flex">
             <Link href="/dashboard">
               <LayoutDashboard />
@@ -69,7 +77,7 @@ export default function Header() {
       <Button asChild size="sm" className="hidden md:flex">
         <Link href="/login">
           <LogIn />
-          Student Login
+          Login
         </Link>
       </Button>
     );
@@ -93,6 +101,14 @@ export default function Header() {
     if (user) {
       return (
         <div className="flex flex-col gap-2 mt-auto">
+          {user.role === 'teacher' && (
+            <Button asChild variant="outline" size="sm" onClick={closeMenu}>
+              <Link href="/teacher/dashboard">
+                <Shield />
+                Teacher Zone
+              </Link>
+            </Button>
+          )}
           <Button asChild variant="outline" size="sm" onClick={closeMenu}>
             <Link href="/dashboard">
               <LayoutDashboard />
@@ -111,7 +127,7 @@ export default function Header() {
        <Button asChild size="sm" onClick={closeMenu} className="mt-auto">
           <Link href="/login">
             <LogIn />
-            Student Login
+            Login
           </Link>
       </Button>
     );

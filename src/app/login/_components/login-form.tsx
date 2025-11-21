@@ -15,6 +15,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { UserProfile } from "@/lib/definitions";
 
 function SignInForm() {
   const auth = useAuth();
@@ -74,7 +75,7 @@ function SignInForm() {
           id="email-signin"
           name="email"
           type="email"
-          placeholder="student@example.com"
+          placeholder="user@example.com"
           required
         />
       </div>
@@ -145,14 +146,15 @@ function RegisterForm() {
       const user = userCredential.user;
 
       if (user) {
-        const studentDocRef = doc(firestore, "students", user.uid);
-        const newStudent = {
+        const userDocRef = doc(firestore, "users", user.uid);
+        const newUser: UserProfile = {
           id: user.uid,
           firstName,
           lastName,
           email: user.email,
+          role: 'student', // Default role
         };
-        await setDoc(studentDocRef, newStudent);
+        await setDoc(userDocRef, newUser);
         router.push("/dashboard");
       }
     } catch (error: any) {
@@ -193,7 +195,7 @@ function RegisterForm() {
           id="email-register"
           name="email"
           type="email"
-          placeholder="student@example.com"
+          placeholder="user@example.com"
           required
         />
       </div>

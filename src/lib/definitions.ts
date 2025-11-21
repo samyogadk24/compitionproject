@@ -3,6 +3,8 @@ export type Announcement = {
   title: string;
   date: string;
   shortDescription: string;
+  content?: string;
+  authorId: string;
 };
 
 export type Event = {
@@ -10,6 +12,7 @@ export type Event = {
   title: string;
   date: string;
   description: string;
+  authorId: string;
 };
 
 export type Resource = {
@@ -19,9 +22,10 @@ export type Resource = {
   fileUrl: string;
 };
 
-export type Student = {
+export type UserProfile = {
   id: string;
   firstName: string;
   lastName: string;
   email: string | null;
+  role: 'student' | 'teacher';
 };
