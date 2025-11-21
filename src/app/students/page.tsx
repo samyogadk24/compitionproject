@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemoFirebase } from '@/firebase';
+import { useMemoFirebase } from '@/firebase/provider';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { useFirestore } from '@/firebase';
 import { collection, query, Query } from 'firebase/firestore';
