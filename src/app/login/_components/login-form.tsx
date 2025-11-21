@@ -23,6 +23,10 @@ export default function LoginForm() {
   const [isSigningIn, setIsSigningIn] = useState(false);
 
   const handleGoogleSignIn = async () => {
+    if (!auth || !firestore) {
+      setError("Firebase is not initialized correctly.");
+      return;
+    }
     setIsSigningIn(true);
     setError(null);
     const provider = new GoogleAuthProvider();
@@ -30,26 +34,30 @@ export default function LoginForm() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      if (user && firestore) {
+      if (user) {
         const studentDocRef = doc(firestore, "students", user.uid);
         const studentDoc = await getDoc(studentDocRef);
 
         if (!studentDoc.exists()) {
-          const [firstName, ...lastNameParts] = user.displayName?.split(" ") || ["", ""];
+          const [firstName, ...lastNameParts] =
+            user.displayName?.split(" ") || ["", ""];
           const lastName = lastNameParts.join(" ");
 
           const newStudent = {
             id: user.uid,
-            firstName,
-            lastName,
+            firstName: firstName,
+            lastName: lastName,
             email: user.email,
           };
-          
-          setDocumentNonBlocking(studentDocRef, newStudent, { merge: true });
+
+          // Use setDoc for creating the document.
+          // The security rules will handle the permission check.
+          await setDoc(studentDocRef, newStudent);
         }
         router.push("/dashboard");
       }
     } catch (error: any) {
+      console.error("Google Sign-In Error:", error);
       setError(error.message);
       toast({
         title: "Login Failed",

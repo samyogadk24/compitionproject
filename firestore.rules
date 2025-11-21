@@ -67,7 +67,7 @@ service cloud.firestore {
     match /students/{studentId} {
       allow get: if isOwner(studentId);
       allow list: if false; // Disallow listing students to prevent user enumeration.
-      allow create: if isOwner(studentId) && request.resource.data.id == studentId;
+      allow create: if isOwner(studentId) && request.resource.data.id == request.auth.uid;
       allow update: if isOwner(studentId) && resource != null && request.resource.data.id == resource.data.id;
       allow delete: if isOwner(studentId) && resource != null;
     }
