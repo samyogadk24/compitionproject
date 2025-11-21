@@ -14,7 +14,7 @@
  *
  * Key Security Decisions:
  * - Student Privacy: The '/students' collection is locked down. Users can only read and write their own
- *   document. Listing all students is explicitly forbidden to prevent user enumeration.
+ *   document. Listing all students is allowed for any signed-in user to support the student directory feature.
  * - Admin-Managed Content: All writes to public collections like '/announcements', '/events', and '/resources'
  *   are denied by default from the client. This is a secure posture that assumes content is managed via a trusted
  *   backend service using the Firebase Admin SDK. To enable client-side writes, these collections would need
@@ -66,7 +66,7 @@ service cloud.firestore {
      */
     match /students/{studentId} {
       allow get: if isOwner(studentId);
-      allow list: if false; // Disallow listing students to prevent user enumeration.
+      allow list: if isSignedIn(); // Allow any authenticated user to list students for the directory.
       allow create: if isOwner(studentId) && request.resource.data.id == request.auth.uid;
       allow update: if isOwner(studentId) && resource != null && request.resource.data.id == resource.data.id;
       allow delete: if isOwner(studentId) && resource != null;
