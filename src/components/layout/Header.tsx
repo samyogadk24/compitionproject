@@ -14,18 +14,12 @@ import { useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useUser } from "@/firebase/auth/use-user";
 
-const baseNavLinks = [
+const navLinksData = [
     { href: "/", label: "Home" },
     { href: "/announcements", label: "Announcements" },
     { href: "/events", label: "Events" },
     { href: "/contact", label: "Contact" },
-];
-
-const authenticatedNavLinks = [
-    { href: "/dashboard", label: "Dashboard" },
-    { href: "/dashboard/announcements", label: "Announcements" },
-    { href: "/dashboard/events", label: "Events" },
-    { href: "/dashboard/students", label: "Directory" },
+    { href: "/dashboard/students", label: "Directory", auth: true},
 ];
 
 
@@ -40,8 +34,16 @@ export default function Header() {
   useEffect(() => {
     setHasMounted(true);
   }, []);
+
+  const getNavLink = (link: {href: string, label: string, auth?: boolean}) => {
+    if (user && link.href !== "/") {
+        if(link.auth) return link;
+        return { ...link, href: `/dashboard${link.href}` };
+    }
+    return link.auth ? null : link;
+  };
   
-  const navLinks = hasMounted && user ? authenticatedNavLinks : baseNavLinks;
+  const navLinks = navLinksData.map(getNavLink).filter(Boolean) as {href: string, label: string}[];
 
 
   const handleLogout = async () => {
@@ -58,6 +60,12 @@ export default function Header() {
     if (user) {
       return (
         <div className="hidden md:flex items-center gap-2">
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/dashboard">
+                <LayoutDashboard />
+                Dashboard
+            </Link>
+          </Button>
           {user.role === 'teacher' && (
              <Button asChild variant="ghost" size="sm">
                 <Link href="/teacher/dashboard">
@@ -98,6 +106,12 @@ export default function Header() {
     if (user) {
       return (
         <div className="flex flex-col gap-2 mt-auto">
+          <Button asChild variant="outline" size="sm" onClick={closeMenu}>
+            <Link href="/dashboard">
+                <LayoutDashboard />
+                Dashboard
+            </Link>
+          </Button>
           {user.role === 'teacher' && (
             <Button asChild variant="outline" size="sm" onClick={closeMenu}>
               <Link href="/teacher/dashboard">
