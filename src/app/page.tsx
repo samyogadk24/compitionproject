@@ -10,8 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CalendarDays, Library, Megaphone, PartyPopper } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { generateAnnouncements } from "@/ai/flows/generate-announcements-flow";
-import { generateEvents } from "@/ai/flows/generate-events-flow";
+import { getAnnouncements, getEvents } from "@/lib/data";
 
 const featureCards = [
   {
@@ -34,10 +33,12 @@ const featureCards = [
   },
 ];
 
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   const heroImage = PlaceHolderImages.find((img) => img.id === "hero-school");
-  const latestAnnouncements = (await generateAnnouncements()).slice(0, 3);
-  const upcomingEvents = (await generateEvents()).slice(0, 3);
+  const latestAnnouncements = await getAnnouncements(3);
+  const upcomingEvents = await getEvents(3);
 
   return (
     <div className="flex flex-col flex-1">
@@ -75,8 +76,8 @@ export default async function Home() {
             <h2 className="text-3xl font-bold font-headline">Latest Announcements</h2>
           </div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {latestAnnouncements.map((announcement, index) => (
-              <Card key={index} className="transition-shadow hover:shadow-md">
+            {latestAnnouncements.map((announcement) => (
+              <Card key={announcement.id} className="transition-shadow hover:shadow-md">
                 <CardHeader>
                   <CardTitle className="font-headline text-xl">{announcement.title}</CardTitle>
                   <CardDescription className="flex items-center gap-2 text-sm pt-1">
@@ -104,8 +105,8 @@ export default async function Home() {
             <h2 className="text-3xl font-bold font-headline">Upcoming Events</h2>
           </div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {upcomingEvents.map((event, index) => (
-              <Card key={index} className="flex flex-col transition-shadow hover:shadow-md">
+            {upcomingEvents.map((event) => (
+              <Card key={event.id} className="flex flex-col transition-shadow hover:shadow-md">
                 <CardHeader>
                   <CardTitle className="font-headline text-xl">{event.title}</CardTitle>
                   <CardDescription className="flex items-center gap-2 text-sm pt-1">

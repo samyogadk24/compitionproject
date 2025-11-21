@@ -2,12 +2,12 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { initializeFirebase } from "@/firebase/index";
+import { initializeFirebaseAdmin } from "@/firebase/server";
 import { collection, query, where, getDocs, limit } from "firebase/firestore";
 
 export async function getUserByUsername(username: string): Promise<{email: string} | null> {
     try {
-        const { firestore } = initializeFirebase();
+        const { firestore } = await initializeFirebaseAdmin();
         const usersRef = collection(firestore, "users");
         const q = query(usersRef, where("username", "==", username), limit(1));
         const querySnapshot = await getDocs(q);

@@ -1,27 +1,34 @@
-import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
+import { collection, getDocs, limit, orderBy, query } from "firebase-admin/firestore";
 import type { Announcement, Event, Resource } from "./definitions";
-import { getSdks } from "@/firebase";
+import { initializeFirebaseAdmin } from "@/firebase/server";
 
-// This file is now primarily for type definitions and fallback data.
-// The main data fetching logic has been moved to the components
-// that use it to leverage real-time updates from Firestore.
-
-export const getAnnouncements = async (firestore: any): Promise<Announcement[]> => {
+export const getAnnouncements = async (count?: number): Promise<Announcement[]> => {
+  const { firestore } = await initializeFirebaseAdmin();
   const announcementsRef = collection(firestore, "announcements");
-  const q = query(announcementsRef, orderBy("date", "desc"), limit(5));
+  const constraints = [orderBy("date", "desc")];
+  if (count) {
+    constraints.push(limit(count));
+  }
+  const q = query(announcementsRef, ...constraints);
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Announcement[];
 };
 
 
-export const getEvents = async (firestore: any): Promise<Event[]> => {
+export const getEvents = async (count?: number): Promise<Event[]> => {
+  const { firestore } = await initializeFirebaseAdmin();
   const eventsRef = collection(firestore, "events");
-   const q = query(eventsRef, orderBy("date", "desc"));
+  const constraints = [orderBy("date", "desc")];
+  if (count) {
+    constraints.push(limit(count));
+  }
+   const q = query(eventsRef, ...constraints);
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Event[];
 };
 
-export const getResources = async (firestore: any): Promise<Resource[]> => {
+export const getResources = async (): Promise<Resource[]> => {
+  const { firestore } = await initializeFirebaseAdmin();
   const resourcesRef = collection(firestore, "resources");
   const querySnapshot = await getDocs(resourcesRef);
   return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Resource[];
